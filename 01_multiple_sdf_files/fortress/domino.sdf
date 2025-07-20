@@ -1,0 +1,42 @@
+<sdf version="1.9">
+<model name="domino" canonical_link="Cube_link">
+  <link name="Cube_link">
+    <collision name="Cube_collision">
+      <pose relative_to="Cube_link">0.00000 -0.00000 -0.00000 0.00000 0.00000 0.00000</pose>
+      <geometry>
+        <box>
+          <size>2.00000 1.00000 4.00000</size>
+        </box>
+      </geometry>
+      <surface>
+        <contact/>
+      </surface>
+    </collision>
+    <inertial>
+      <inertia>
+        <ixx>1.41667</ixx>
+        <ixy>0.00000</ixy>
+        <ixz>0.00000</ixz>
+        <iyy>1.66667</iyy>
+        <iyz>0.00000</iyz>
+        <izz>0.41667</izz>
+      </inertia>
+      <pose relative_to="Cube_link">0.00000 -0.00000 -0.00000 0.00000 0.00000 0.00000</pose>
+      <mass>0.0500000</mass>
+    </inertial>
+    <visual name="Cube">
+      <material>
+        <diffuse>0.00000 0.00000 0.60000 0.90000</diffuse>
+        <specular>0.00000 0.00000 0.60000 0.90000</specular>
+        <emissive>0.00000 0.00000 0.60000 0.90000</emissive>
+      </material>
+      <pose relative_to="Cube_link">0.00000 0.00000 0.00000 0.00000 0.00000 0.00000</pose>
+      <geometry>
+        <box>
+          <size>2.00000 1.00000 4.00000</size>
+        </box>
+      </geometry>
+    </visual>
+  </link>
+</model>
+</sdf>
