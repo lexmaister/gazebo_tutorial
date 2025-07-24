@@ -40,7 +40,8 @@ You can include the same model description multiple times in your world file wit
 
 ## 5. Video
 
-Video with this tutorial on [YouTube](https://youtu.be/l8bghDZGrZo)
+[![video_tutorial_YT](https://img.youtube.com/vi/l8bghDZGrZo/0.jpg)](https://www.youtube.com/watch?v=l8bghDZGrZo)
+
 
 ## References
 
