@@ -38,6 +38,10 @@ You can include the same model description multiple times in your world file wit
     gz sim main.sdf
 ```
 
+## 5. Video
+
+Video with this tutorial on [YouTube](https://youtu.be/l8bghDZGrZo)
+
 ## References
 
 - [Gazebo SDF Documentation](https://gazebosim.org/docs/all/sdf)
