@@ -1,2 +1,2 @@
-# Gazebo Tutorial: Export From Blender With Phobos - frames
+# Gazebo Tutorial: Export From Blender With Phobos - Basic Elements
 
