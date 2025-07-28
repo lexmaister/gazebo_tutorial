@@ -22,5 +22,6 @@ gz sim main.sdf
 [![video_tutorial_YT](https://img.youtube.com/vi/3DswcUj0HLc/0.jpg)](https://www.youtube.com/watch?v=3DswcUj0HLc)
 
 ## References
-- [Gazebo SDF Documentation](https://gazebosim.org/docs/all/sdf)
 - [Phobos repository](https://github.com/dfki-ric/phobos)
+- [Gazebo SDF Documentation](https://gazebosim.org/docs/all/sdf)
+- [Model kinematics description in SDF](http://sdformat.org/tutorials?tut=spec_model_kinematics&cat=specification&)
