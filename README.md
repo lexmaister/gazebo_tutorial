@@ -7,7 +7,7 @@ This set of tutorials is intended for **Gazebo Harmonic and newer versions**, ma
 ## Tutorials
 
 - [Multiple SDF Files: Including and Placing Multiple Model Instances](https://github.com/lexmaister/gazebo_tutorial/tree/main/01_multiple_sdf_files)
-- [Multiple SDF Files: Export From Blender With Phobos - Basic Elements](https://github.com/lexmaister/gazebo_tutorial/tree/main/002_blender_phobos_export-frames)
+- [Export From Blender With Phobos - Basic Elements](https://github.com/lexmaister/gazebo_tutorial/tree/main/002_blender_phobos_export-frames)
 
 
 ## References
