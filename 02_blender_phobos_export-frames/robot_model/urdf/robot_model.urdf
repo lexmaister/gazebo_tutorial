@@ -1,0 +1,55 @@
+<robot name="robot_model" version="1.0">
+  <joint name="arm_base_joint" type="revolute">
+    <limit lower="-1.58000" upper="0.00000" effort="100.00000" velocity="100.00000"/>
+    <origin rpy="1.57080 0.00000 0.00000" xyz="1.50000 0.00000 3.50000"/>
+    <parent link="base_link"/>
+    <child link="arm_link"/>
+    <axis xyz="1.00000 0.00000 0.00000"/>
+  </joint>
+  <link name="base_link">
+    <collision name="base_collision">
+      <origin rpy="0.00000 0.00000 0.00000" xyz="0.00000 0.00000 0.00000"/>
+      <geometry>
+        <box size="2.00000 2.00000 9.00000"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <inertia ixx="70.83333" ixy="0.00000" ixz="0.00000" iyy="70.83333" iyz="0.00000" izz="6.66667"/>
+      <origin rpy="0.00000 0.00000 0.00000" xyz="0.00000 0.00000 0.00000"/>
+      <mass value="10.00000"/>
+    </inertial>
+    <visual name="base">
+      <material name="blue"/>
+      <origin rpy="0.00000 0.00000 0.00000" xyz="0.00000 0.00000 0.00000"/>
+      <geometry>
+        <box size="2.00000 2.00000 9.00000"/>
+      </geometry>
+    </visual>
+  </link>
+  <link name="arm_link">
+    <collision name="arm_collision">
+      <origin rpy="-0.00000 0.00000 0.00000" xyz="0.00000 0.00000 -3.00000"/>
+      <geometry>
+        <cylinder radius="0.50000" length="8.00000"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <inertia ixx="0.53958" ixy="0.00000" ixz="0.00000" iyy="0.01250" iyz="-0.00000" izz="0.53958"/>
+      <origin rpy="0.00000 0.00000 0.00000" xyz="0.00000 0.00000 -3.00000"/>
+      <mass value="0.10000"/>
+    </inertial>
+    <visual name="arm">
+      <material name="orange"/>
+      <origin rpy="0.00000 0.00000 0.00000" xyz="0.00000 0.00000 -3.00000"/>
+      <geometry>
+        <cylinder radius="0.50000" length="8.00000"/>
+      </geometry>
+    </visual>
+  </link>
+  <material name="blue">
+    <color rgba="0.00000 0.00000 1.00000 1.00000"/>
+  </material>
+  <material name="orange">
+    <color rgba="0.80000 0.32941 0.00000 1.00000"/>
+  </material>
+</robot>

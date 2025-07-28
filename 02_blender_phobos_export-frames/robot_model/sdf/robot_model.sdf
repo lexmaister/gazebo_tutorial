@@ -1,0 +1,93 @@
+<sdf version='1.11'>
+  <model name='robot_model'>
+    <link name='base_link'>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>10</mass>
+        <inertia>
+          <ixx>70.833330000000004</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>70.833330000000004</iyy>
+          <iyz>0</iyz>
+          <izz>6.6666699999999999</izz>
+        </inertia>
+      </inertial>
+      <collision name='base_link_fixed_joint_lump__base_collision_collision'>
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>2 2 9</size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name='base_link_fixed_joint_lump__base_visual'>
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>2 2 9</size>
+          </box>
+        </geometry>
+        <material>
+          <diffuse>0 0 1 1</diffuse>
+          <ambient>0 0 1 1</ambient>
+        </material>
+      </visual>
+    </link>
+    <joint name='arm_base_joint' type='revolute'>
+      <pose relative_to='base_link'>1.5 0 3.5 1.5708 0 0</pose>
+      <parent>base_link</parent>
+      <child>arm_link</child>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-1.5800000000000001</lower>
+          <upper>0</upper>
+          <effort>100</effort>
+          <velocity>100</velocity>
+        </limit>
+        <dynamics>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='arm_link'>
+      <pose relative_to='arm_base_joint'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 -3 0 0 0</pose>
+        <mass>0.10000000000000001</mass>
+        <inertia>
+          <ixx>0.53957999999999995</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.012500000000000001</iyy>
+          <iyz>0</iyz>
+          <izz>0.53957999999999995</izz>
+        </inertia>
+      </inertial>
+      <collision name='arm_link_fixed_joint_lump__arm_collision_collision'>
+        <pose>0 0 -3 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>8</length>
+            <radius>0.5</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='arm_link_fixed_joint_lump__arm_visual'>
+        <pose>0 0 -3 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>8</length>
+            <radius>0.5</radius>
+          </cylinder>
+        </geometry>
+        <material>
+          <diffuse>1 0.411762476 0 1</diffuse>
+          <ambient>1 0.411762476 0 1</ambient>
+        </material>
+      </visual>
+    </link>
+  </model>
+</sdf>
