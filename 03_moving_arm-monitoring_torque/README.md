@@ -1,1 +1,1 @@
-# Gazebo Tutorial: Estimation of Joint Torque by Force Torque Sensor
+# Gazebo Tutorial: Estimation of Joint Torque with Force Torque Sensor
