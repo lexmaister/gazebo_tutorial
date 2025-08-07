@@ -1,0 +1,131 @@
+<sdf version='1.11'>
+    <model name='robot_model'>
+        <link name='base_link'>
+            <inertial>
+                <pose>0 0 0 0 0 0</pose>
+                <mass>100</mass>
+                <inertia>
+                    <ixx>70.833330000000004</ixx>
+                    <ixy>0</ixy>
+                    <ixz>0</ixz>
+                    <iyy>70.833330000000004</iyy>
+                    <iyz>0</iyz>
+                    <izz>6.6666699999999999</izz>
+                </inertia>
+            </inertial>
+            <collision name='base_link_fixed_joint_lump__base_collision_collision'>
+                <pose>0 0 0 0 0 0</pose>
+                <geometry>
+                    <box>
+                        <size>2 2 9</size>
+                    </box>
+                </geometry>
+            </collision>
+            <visual name='base_link_fixed_joint_lump__base_visual'>
+                <pose>0 0 0 0 0 0</pose>
+                <geometry>
+                    <box>
+                        <size>2 2 9</size>
+                    </box>
+                </geometry>
+                <material>
+                    <diffuse>0 0 1 1</diffuse>
+                    <ambient>0 0 1 1</ambient>
+                </material>
+            </visual>
+        </link>
+        <joint name='arm_base_joint' type='revolute'>
+            <pose relative_to='base_link'>-1.6 0 3.5 0 0 0</pose>
+            <parent>base_link</parent>
+            <child>arm_link</child>
+            <axis>
+                <xyz>1 0 0</xyz>
+                <limit>
+                    <lower>0</lower>
+                    <upper>1.57</upper>
+                    <effort>200</effort>
+                    <velocity>100</velocity>
+                </limit>
+                <dynamics>
+                </dynamics>
+            </axis>
+            <sensor name="force_torque_sensor" type="force_torque">
+                <update_rate>2</update_rate>                <!-- Hz -->
+                <topic>/arm_base_joint_ft</topic>
+                <force_torque>
+                    <frame>child</frame>
+                </force_torque>
+            </sensor>
+        </joint>
+        <link name='arm_link'>
+            <pose relative_to='arm_base_joint'>0 0 0 0 0 0</pose>
+            <inertial>
+                <pose>0 0 -7.0909090909090908 0 0 0</pose>
+                <mass>1.1</mass>
+                <inertia>
+                    <ixx>2.480489090909082</ixx>
+                    <ixy>0</ixy>
+                    <ixz>0</ixz>
+                    <iyy>1.953409090909084</iyy>
+                    <iyz>0</iyz>
+                    <izz>0.63957999999999993</izz>
+                </inertia>
+            </inertial>
+            <collision name='arm_link_fixed_joint_lump__arm_collision_collision'>
+                <pose>0 0 -3 0 0 0</pose>
+                <geometry>
+                    <cylinder>
+                        <length>8</length>
+                        <radius>0.5</radius>
+                    </cylinder>
+                </geometry>
+            </collision>
+            <visual name='arm_link_fixed_joint_lump__arm_visual'>
+                <pose>0 0 -3 0 0 0</pose>
+                <geometry>
+                    <cylinder>
+                        <length>8</length>
+                        <radius>0.5</radius>
+                    </cylinder>
+                </geometry>
+                <material>
+                    <diffuse>1 0.411762476 0 1</diffuse>
+                    <ambient>1 0.411762476 0 1</ambient>
+                </material>
+            </visual>
+            <visual name='arm_link_fixed_joint_lump__load_visual_1'>
+                <pose>0 0 -7.5 0 0 -3.1415899999999999</pose>
+                <geometry>
+                    <sphere>
+                        <radius>0.5</radius>
+                    </sphere>
+                </geometry>
+                <material>
+                    <diffuse>0 1 0 1</diffuse>
+                    <ambient>0 1 0 1</ambient>
+                </material>
+            </visual>
+        </link>
+        <frame name='arm_load_joint' attached_to='arm_link'>
+            <pose>0 0 -7.5 0 0 -3.1415899999999999</pose>
+        </frame>
+        <frame name='load_link' attached_to='arm_load_joint'>
+            <pose>0 0 0 0 0 0</pose>
+        </frame>
+        <plugin filename="gz-sim-joint-position-controller-system" name="gz::sim::systems::JointPositionController">
+            <joint_name>arm_base_joint</joint_name>
+            <p_gain>300</p_gain>
+            <i_gain>100</i_gain>
+            <d_gain>200</d_gain>
+            <i_max>100</i_max>
+            <i_min>-100</i_min>
+            <cmd_max>200</cmd_max>
+            <cmd_min>-200</cmd_min>
+            <initial_position>0</initial_position>
+        </plugin>
+        <plugin filename="gz-sim-joint-state-publisher-system" name="gz::sim::systems::JointStatePublisher">
+            <joint_name>arm_base_joint</joint_name>
+            <topic>/arm_base_joint_state</topic>
+        </plugin>
+    </model>
+</sdf>
