@@ -9,6 +9,7 @@ This set of tutorials is intended for **Gazebo Harmonic and newer versions**, ma
 - [Multiple SDF Files: Including and Placing Multiple Model Instances](https://github.com/lexmaister/gazebo_tutorial/tree/main/01_multiple_sdf_files)
 - [Export From Blender With Phobos - Basic Elements](https://github.com/lexmaister/gazebo_tutorial/tree/main/02_blender_phobos_export-frames)
 - [Estimation of Joint Torque with Force Torque Sensor](https://github.com/lexmaister/gazebo_tutorial/tree/main/03_moving_arm-monitoring_torque/)
+- [Connect ROS2 and Gazebo Simulation with ros_gz_bridge](https://github.com/lexmaister/gazebo_tutorial/tree/main/04_ros2_communication/)
 
 ## References
 
