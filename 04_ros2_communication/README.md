@@ -140,7 +140,7 @@ This script starts all required `ros_gz_bridge` processes based on your SDF plug
 
 ## 8. Video
 
-<!-- [![video_tutorial_YT](https://img.youtube.com/vi/7ewrPQ2ovFk/0.jpg)](https://www.youtube.com/watch?v=7ewrPQ2ovFk) -->
+[![video_tutorial_YT](https://img.youtube.com/vi/fmhGUUFOLGU/0.jpg)](https://www.youtube.com/watch?v=fmhGUUFOLGU)
 
 ---
 
