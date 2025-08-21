@@ -1,0 +1,14 @@
+controller_manager:
+  ros__parameters:
+    update_rate: 250
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+    j1_controller:   # Controller for your specific joint
+      type: joint_trajectory_controller/JointTrajectoryController
+
+j1_controller:
+  ros__parameters:
+    joints: [panda_joint1]
+    command_interfaces: [position]
+    state_interfaces: [position, velocity]
+    # Optionally, joint limits/external interfaces
