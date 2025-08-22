@@ -4,7 +4,7 @@
   <name>panda_gz_ros2_ctrl</name>
   <version>0.1.0</version>
   <description>This example package demonstrates how to control a Panda manipulator in Gazebo Sim using ROS 2 position control (pos2_control), with topic bridging powered by ros_gz_bridge.</description>
-  <maintainer email="aleev@simicon.com">lexmaister</maintainer>
+  <maintainer email="lexmaister@gmail.com">lexmaister</maintainer>
   <license>MIT</license>
 
   <test_depend>ament_copyright</test_depend>
