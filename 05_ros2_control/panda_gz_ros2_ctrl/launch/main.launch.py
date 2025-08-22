@@ -14,7 +14,6 @@ def generate_launch_description():
     )
     logger_level = LaunchConfiguration('logger_level')
     use_sim_time = LaunchConfiguration('use_sim_time', default='true')
-    gz_args = LaunchConfiguration('gz_args', default=' -r -v 1 empty.sdf')
 
     # Robot description from URDF
     robot_description_content = Command([
@@ -34,6 +33,13 @@ def generate_launch_description():
         FindPackageShare('panda_gz_ros2_ctrl'),
         'config',
         'controller.yaml'
+    ])
+
+    # World SDF
+    world = PathJoinSubstitution([
+        FindPackageShare('panda_gz_ros2_ctrl'),
+        'sdf',
+        'main.sdf'
     ])
 
     node_robot_state_publisher = Node(
@@ -78,7 +84,7 @@ def generate_launch_description():
             PythonLaunchDescriptionSource([
                 PathJoinSubstitution([FindPackageShare('ros_gz_sim'), 'launch', 'gz_sim.launch.py'])
             ]),
-            launch_arguments={'gz_args': gz_args}.items()
+            launch_arguments=[('gz_args', [' -r -v 2 ', world, ' --physics-engine gz-physics-bullet-featherstone-plugin'])]
         ),
         RegisterEventHandler(
             event_handler=OnProcessExit(

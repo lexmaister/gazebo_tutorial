@@ -15,8 +15,9 @@ setup(
         ('share/ament_index/resource_index/packages', ['resource/' + package_name]),
         (os.path.join('share', package_name), ['package.xml']),
         (os.path.join('share', package_name, 'launch'), glob('launch/*')),
+        # SDF files
         (os.path.join('share', package_name, 'sdf'), glob('sdf/*')),
-        # robot description files
+        # Robot descripion
         (os.path.join('share', package_name, 'panda_description', 'urdf'), glob('panda_description/urdf/*')),
         (os.path.join('share', package_name, 'panda_description', 'meshes', 'visual'), glob('panda_description/meshes/visual/*')),
         (os.path.join('share', package_name, 'panda_description', 'meshes', 'collision'), glob('panda_description/meshes/collision/*')),
