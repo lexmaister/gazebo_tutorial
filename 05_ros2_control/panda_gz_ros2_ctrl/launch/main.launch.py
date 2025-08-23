@@ -6,7 +6,13 @@ from launch.substitutions import Command, FindExecutable, LaunchConfiguration, P
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
 
+
+# "Could not find shared library" error
+# https://github.com/ros-controls/gz_ros2_control/issues/390
+
+
 def generate_launch_description():
+    # Launch Arguments
     logger_level_arg = DeclareLaunchArgument(
         'logger_level',
         default_value='info',
@@ -84,6 +90,7 @@ def generate_launch_description():
             PythonLaunchDescriptionSource([
                 PathJoinSubstitution([FindPackageShare('ros_gz_sim'), 'launch', 'gz_sim.launch.py'])
             ]),
+            # engine for mimic joint - https://github.com/ros-controls/gz_ros2_control/issues/340
             launch_arguments=[('gz_args', [' -r -v 2 ', world, ' --physics-engine gz-physics-bullet-featherstone-plugin'])]
         ),
         RegisterEventHandler(

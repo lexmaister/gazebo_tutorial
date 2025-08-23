@@ -29,21 +29,6 @@
         </light>
 
         <gui fullscreen="0">
-            <!-- Joint Position Ctrl -->
-            <plugin filename="JointPositionController" name="Joint Position Controller">
-                <gz-gui>
-                    <property type="bool" key="showTitleBar">true</property>
-                    <property type="bool" key="resizable">true</property>
-                    <property type="double" key="width">450</property>
-                    <property type="double" key="height">150</property>
-                    <property type="string" key="state">floating</property>
-                    <anchors target="3D View">
-                        <line own="left" target="left"/>
-                        <line own="top" target="top"/>
-                    </anchors>
-                </gz-gui>
-            </plugin>
-
             <!-- 3D scene -->
             <plugin filename="MinimalScene" name="3D View">
                 <gz-gui>
@@ -56,7 +41,7 @@
                 <scene>scene</scene>
                 <ambient_light>0.4 0.4 0.4</ambient_light>
                 <background_color>0.8 0.8 0.8</background_color>
-                <camera_pose>-1.5 0 1 0 0.4 0</camera_pose>
+                <camera_pose>0.5 1.5 1 0 0.4 -2.0</camera_pose>
                 <camera_clip>
                     <near>0.3</near>
                     <far>5000</far>
