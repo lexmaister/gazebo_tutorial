@@ -13,6 +13,9 @@ from launch_ros.parameter_descriptions import ParameterValue
 
 
 def generate_launch_description():
+
+    # ----- PARAMETERS -----
+
     # Launch Arguments
     logger_level_arg = DeclareLaunchArgument(
         'logger_level',
@@ -44,13 +47,23 @@ def generate_launch_description():
         'controller.yaml'
     ])
 
-    # World SDF
+    # World SDF path
     world = PathJoinSubstitution([
         FindPackageShare('panda_gz_ros2_ctrl'),
         'sdf',
         'main.sdf'
     ])
 
+    # RViz config path
+    rviz_config = PathJoinSubstitution([
+        FindPackageShare('panda_gz_ros2_ctrl'),
+        'config',
+        'view_robot.rviz'
+    ])
+
+    # ----- NODES -----
+
+    # Robots description publisher
     node_robot_state_publisher = Node(
         package='robot_state_publisher',
         executable='robot_state_publisher',
@@ -59,6 +72,7 @@ def generate_launch_description():
         arguments=['--ros-args', '--log-level', logger_level]
     )
 
+    # Gasebo Sim
     gz_spawn_entity = Node(
         package='ros_gz_sim',
         executable='create',
@@ -70,6 +84,7 @@ def generate_launch_description():
             '--ros-args', '--log-level', logger_level],
     )
 
+    # Controllers
     joint_state_broadcaster_spawner = Node(
         package='controller_manager',
         executable='spawner',
@@ -108,6 +123,17 @@ def generate_launch_description():
         output='screen'
     )
 
+    # RViz
+    rviz_node = Node(
+        package='rviz2',
+        executable='rviz2',
+        name='rviz2',
+        output='screen',
+        arguments=['-d', rviz_config, '--ros-args', '--log-level', logger_level],
+        # RViz needs to use simulation time
+        parameters=[{'use_sim_time': use_sim_time}],
+    )
+
     return LaunchDescription([
         logger_level_arg,
         # Launch Gazebo with specified world
@@ -139,6 +165,7 @@ def generate_launch_description():
         bridge,
         node_robot_state_publisher,
         gz_spawn_entity,
+        rviz_node,
         DeclareLaunchArgument(
             'use_sim_time',
             default_value='true',
