@@ -5,6 +5,7 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import Command, FindExecutable, LaunchConfiguration, PathJoinSubstitution
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
+from launch_ros.parameter_descriptions import ParameterValue
 
 
 # "Could not find shared library" error
@@ -32,7 +33,9 @@ def generate_launch_description():
             'panda.urdf.xacro'
         ])
     ])
-    robot_description = {'robot_description': robot_description_content}
+    robot_description = {
+        'robot_description': ParameterValue(robot_description_content, value_type=str)
+    }
 
     # Controller config path
     robot_controllers = PathJoinSubstitution([
@@ -60,26 +63,48 @@ def generate_launch_description():
         package='ros_gz_sim',
         executable='create',
         output='screen',
-        arguments=['-topic', 'robot_description', '-name', 'panda', '-allow_renaming', 'true'],
+        arguments=[
+            '-topic', 'robot_description', 
+            '-name', 'panda', 
+            '-allow_renaming', 'true',
+            '--ros-args', '--log-level', logger_level],
     )
 
     joint_state_broadcaster_spawner = Node(
         package='controller_manager',
         executable='spawner',
-        arguments=['joint_state_broadcaster'],
+        arguments=[
+            'joint_state_broadcaster', 
+            '--param-file', robot_controllers,
+            '--ros-args', '--log-level', logger_level
+            ],
     )
 
     panda_arm_controller_spawner = Node(
         package='controller_manager',
         executable='spawner',
-        arguments=['panda_arm_controller', '--param-file', robot_controllers],
+        arguments=[
+            'panda_arm_controller', 
+            '--param-file', robot_controllers,
+            '--ros-args', '--log-level', logger_level
+            ],
+    )
+
+    panda_hand_controller_spawner = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=[
+            "panda_hand_controller", 
+            '--param-file', robot_controllers,
+            '--ros-args', '--log-level', logger_level],
     )
 
     # Clock bridge: Gazebo <-> ROS 2
     bridge = Node(
         package='ros_gz_bridge',
         executable='parameter_bridge',
-        arguments=['/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock'],
+        arguments=['/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock', 
+                   '--ros-args', '--log-level', logger_level],
         output='screen'
     )
 
@@ -91,7 +116,13 @@ def generate_launch_description():
                 PathJoinSubstitution([FindPackageShare('ros_gz_sim'), 'launch', 'gz_sim.launch.py'])
             ]),
             # engine for mimic joint - https://github.com/ros-controls/gz_ros2_control/issues/340
-            launch_arguments=[('gz_args', [' -r -v 2 ', world, ' --physics-engine gz-physics-bullet-featherstone-plugin'])]
+            launch_arguments=[
+                ('gz_args', [
+                    ' -r -v 2 ', 
+                    world, 
+                    ' --physics-engine gz-physics-bullet-featherstone-plugin',
+                    ]
+                )]
         ),
         RegisterEventHandler(
             event_handler=OnProcessExit(
@@ -102,7 +133,7 @@ def generate_launch_description():
         RegisterEventHandler(
             event_handler=OnProcessExit(
                 target_action=joint_state_broadcaster_spawner,
-                on_exit=[panda_arm_controller_spawner]
+                on_exit=[panda_arm_controller_spawner, panda_hand_controller_spawner]
             )
         ),
         bridge,
