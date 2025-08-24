@@ -33,6 +33,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+            'demo_control = panda_gz_ros2_ctrl.demo_control:main'
         ],
     },
 )
