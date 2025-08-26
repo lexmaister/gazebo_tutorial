@@ -1,59 +1,149 @@
-# Gazebo Tutorial: Controlling a Panda Arm in Gazebo Sim with Position Control (pos2_control)
+# Gazebo Tutorial: Controlling a Panda Arm in Gazebo with `ros2_control`
 
 ## Introduction
 
-This example package demonstrates how to control a Panda manipulator in Gazebo Sim using ROS2 position control (pos2_control), with topic bridging powered by ros_gz_bridge. TODO: extend
+This example package demonstrates how to control a Panda manipulator in Gazebo Sim using the `ros2_control` framework. It serves as the bridge between a static robot model and a dynamically controllable system, which is the foundation for all advanced robotics tasks.
 
----
+This tutorial will guide you through the complete process:
 
-DRAFT:
+- **Configuration:** Setting up the URDF with `ros2_control` plugins and defining controllers in YAML.
+- **Simulation:** Launching the entire stack, including Gazebo, RViz, and all necessary ROS nodes.
+- **Interaction:** Commanding the robot's joints manually from the command line for testing and debugging.
+- **Automation:** Running a Python script to execute a complex, pre-programmed sequence of motions.
 
-create tutorial ws
+## Prerequisites
+
+- You have a ROS 2 distribution (e.g., Jazzy) with Gazebo and developer tools installed.
+- You have successfully completed the previous tutorials in this series.
+- You have installed the necessary `ros2_control` and Gazebo integration packages. Note the use of `$ROS_DISTRO` to automatically adapt to your ROS 2 version:
+  
+```bash
+sudo apt update
+source /opt/ros/<YOUR-DISTRO>/setup.bash # change <YOUR-DISTRO> to your version, e.g. humble, jazzy
+sudo apt install ros-$ROS_DISTRO-ros2-control ros-$ROS_DISTRO-ros2-controllers ros-$ROS_DISTRO--gz-ros2-control ros-$ROS_DISTRO--gz-ros2-control-demos
+```
+
+## Key Concepts: The ros2_control Architecture
+
+The framework connects controllers to hardware (or a simulation) via a standard interface model. It's helpful to think of this as a Provider/Consumer relationship.
+
+### The URDF: The Hardware "Provider"
+
+The URDF [panda.urdf.xacro](./panda_gz_ros2_ctrl/panda_description/urdf/panda.urdf.xacro) defines the physical robot and also declares the "hardware interfaces" it makes available. In simulation, the gz_ros2_control/GazeboSimSystem plugin acts as our virtual hardware. We add a <ros2_control> tag to specify which joints can be controlled and what data they provide:
+
+```xml
+<ros2_control name="GazeboSimSystem" type="system">
+    <hardware>
+        <plugin>gz_ros2_control/GazeboSimSystem</plugin>
+    </hardware>
+
+    <!-- Example for a single arm joint -->
+    <joint name="panda_joint1">
+        <!-- This joint can be commanded via position -->
+        <command_interface name="position"/>
+        <!-- This joint provides its position, velocity, and effort as feedback -->
+        <state_interface name="position"/>
+        <state_interface name="velocity"/>
+        <state_interface name="effort"/>
+    </joint>
+    <!-- ... all 7 arm joints are defined similarly ... -->
+
+    <!-- Example for the gripper, where one joint mimics another -->
+    <joint name="panda_finger_joint1">
+        <command_interface name="position"/>
+        <state_interface name="position"/>
+    </joint>
+    <joint name="panda_finger_joint2">
+        <!-- The mimic joint ONLY provides state, it cannot be commanded directly -->
+        <state_interface name="position"/>
+    </joint>
+</ros2_control>
+```
+
+### YAML: The Controller "Consumer"
+
+The controller configuration file [controller.yaml](./panda_gz_ros2_ctrl/config/controller.yaml) defines which controllers we want to use and which of the "provided" interfaces they will "consume" to do their job:
+
+```yaml
+controller_manager:
+  ros__parameters:
+    update_rate: 1000  # Hz
+
+# This special controller reads ALL state interfaces and publishes them to /joint_states
+joint_state_broadcaster:
+  ros__parameters:
+    type: joint_state_broadcaster/JointStateBroadcaster
+
+# This controller "consumes" the 7 arm joints
+panda_arm_controller:
+  ros__parameters:
+    type: joint_trajectory_controller/JointTrajectoryController
+    joints:
+      - panda_joint1
+      - panda_joint2
+    ...
+
+# This controller "consumes" only the single actuated gripper joint
+panda_hand_controller:
+  ros__parameters:
+    type: joint_trajectory_controller/JointTrajectoryController
+    joints:
+      - panda_finger_joint1
+    ...
+```
+
+## Building and Launching the Full Simulation
+
+Create a workspace:
 
 ```sh
 mkdir -p tutorial_ws/src
 cd tutorial_ws/src
 ```
 
-download pkg code
+Download package code into it:
 
-* Go to: [GitHub Download Directory](https://download-directory.github.io/)
-* Paste pkg address `https://github.com/lexmaister/gazebo_tutorial/tree/main/05_ros2_control/panda_gz_ros2_ctrl` and click `Download`
-
-Unpack zip to `tutorial_ws/src` (example):
+- Go to: [GitHub Download Directory](https://download-directory.github.io/)
+- Paste pkg address `https://github.com/lexmaister/gazebo_tutorial/tree/main/05_ros2_control/panda_gz_ros2_ctrl` and click `Download`
+- Unpack zip to `tutorial_ws/src` (example):
 
 ```sh
 unzip ~/Downloads/lexmaister\ gazebo_tutorial\ main\ 05_ros2_control-panda_gz_ros2_ctrl.zip -d panda_gz_ros2_ctrl
 ```
 
-Source ROS2 and build the package (jazzy example)
+Source ROS2 and build the package:
 
 ```sh
 cd ..
 colcon build --symlink-install
 ```
 
-Source the environment and run main launch file
+Source the environment and run `main` launch file
 
 ```sh
 source install/setup.bash
+ros2 launch panda_gz_ros2_ctrl main.launch.py
 ```
 
-USAGE
+You should see the Panda robot in its upright "park" pose in both the Gazebo and RViz windows.
 
-* launch with exact logger level
+It is also possible to launch with debug logger level:
 
 ```sh
 ros2 launch panda_gz_ros2_ctrl main.launch.py logger_level:=debug
 ```
 
-IN other terminal:
+## Manual Interaction
+
+With the simulation running, we can use command-line tools to test our controllers. You need another terminal with sourced ROS2:
 
 ```sh
-source /opt/ros/jazzy/setup.bash
+source /opt/ros/<YOUR-DISTRO>/setup.bash # change <YOUR-DISTRO> to your version, e.g. humble, jazzy
 ```
 
-* send command to open gripper
+### Controlling the Gripper
+
+Send a goal to the `panda_hand_controller` to open the gripper. The value `0.04` corresponds to the joint's upper limit we use slightly lower range here:
 
 ```sh
 ros2 action send_goal /panda_hand_controller/follow_joint_trajectory control_msgs/action/FollowJointTrajectory '{
@@ -61,7 +151,7 @@ ros2 action send_goal /panda_hand_controller/follow_joint_trajectory control_msg
     "joint_names": ["panda_finger_joint1"],
     "points": [
       {
-        "positions": [0.04],
+        "positions": [0.035],
         "time_from_start": {"sec": 2, "nanosec": 0}
       }
     ]
@@ -69,10 +159,9 @@ ros2 action send_goal /panda_hand_controller/follow_joint_trajectory control_msg
 }'
 ```
 
-* send command to close gripper
+Send the goal to close it. It's normal, that gripper won't close. The issue is in PID controller settings - that will be cover in the next tutorials.
 
 ```sh
-# Close action
 ros2 action send_goal /panda_hand_controller/follow_joint_trajectory control_msgs/action/FollowJointTrajectory '{
   "trajectory": {
     "joint_names": ["panda_finger_joint1"],
@@ -86,7 +175,9 @@ ros2 action send_goal /panda_hand_controller/follow_joint_trajectory control_msg
 }'
 ```
 
-* move arm left
+### Controlling the Arm
+
+Similarly, we command the panda_arm_controller. We must specify all 7 joints and their target positions.
 
 ```sh
 ros2 action send_goal /panda_arm_controller/follow_joint_trajectory control_msgs/action/FollowJointTrajectory '{
@@ -105,7 +196,7 @@ ros2 action send_goal /panda_arm_controller/follow_joint_trajectory control_msgs
 }'
 ```
 
-* move arm to park [0.0, -0.785, 0.0, -2.356, 0.0, 1.571, 0.785]
+And then we can move the arm to the park position:
 
 ```sh
 ros2 action send_goal /panda_arm_controller/follow_joint_trajectory control_msgs/action/FollowJointTrajectory '{
@@ -124,13 +215,15 @@ ros2 action send_goal /panda_arm_controller/follow_joint_trajectory control_msgs
 }'
 ```
 
-* check controller data:
+### Monitoring Joint States
+
+To see the "ground truth" data from the simulation, you can "echo" the /joint_states topic. This is invaluable for seeing if a joint is truly stuck or just moving very little.
 
 ```sh
 ros2 topic echo /joint_states sensor_msgs/msg/JointState
 ```
 
-example message:
+Example message contains all joints' data:
 
 ```text
 header:
@@ -181,15 +274,47 @@ effort:
 ---
 ```
 
-* run demo sequence in another terminal
+### Live PID Tuning
+
+If a controller is misbehaving (as it cannot close gripper), you can adjust its PID gains live without restarting the simulation.
+
+```sh
+ros2 param set /controller_manager panda_hand_controller.gains.panda_finger_joint1.p 100.0
+```
+
+## Programmatic Control with a Python Node
+
+The ultimate goal is automation. The [demo_control.py](./panda_gz_ros2_ctrl/panda_gz_ros2_ctrl/demo_control.py) node provides an example of programmatic control using the rclpy action client to chain a sequence of motions. While simulation is running, we may run it in another terminal:
 
 ```sh
 cd tutorial_ws
-source /opt/ros/jazzy/setup.bash
+source /opt/ros/<YOUR-DISTRO>/setup.bash # change <YOUR-DISTRO> to your version, e.g. humble, jazzy
 source install/setup.bash
 ros2 run panda_gz_ros2_ctrl demo_control
 ```
 
-example node running:
+The robot will automatically execute a sequence of motions:
 
-![demo_ctrl](./docs/demo_ctrl.png)
+- Start at Park
+- Move to Reach Left -> Reach Right -> High Pose -> Pickup Pose
+- Open and Close the gripper
+- Return to Park
+
+![Example node running](./docs/demo_ctrl.png)
+
+## Troubleshooting Common Issues
+
+- **"Controller 'type' param not defined" Error**: The controller.yaml file was not loaded. Ensure your main.launch.py correctly passes the controller parameters to the gz_sim process.
+- **Gripper Opens But Won't Close**: This is a classic symptom of the gripper's collision mesh "jamming" against the hand at its joint limit. The fix is to slightly shrink the finger collision boxes in the URDF to create a physical clearance.
+- **Joint "Tries to Move but Fails"**: The controller's force is not enough to overcome the simulation's physics (damping and friction). The best solution is to reduce or eliminate the `<dynamics damping="...">` and Gazebo friction properties for that joint in the URDF or adjusting PID controller parameters.
+- **Robot Collapses on Startup**: The initial_value for the joints in the URDF's <ros2_control> tag is not a gravitationally stable pose. Adjust these values to a stable starting configuration.
+
+## Video
+
+<!-- [![video_tutorial_YT](https://img.youtube.com/vi/fmhGUUFOLGU/0.jpg)](https://www.youtube.com/watch?v=fmhGUUFOLGU) -->
+
+## References
+
+- [`ros2_control` package documentation (jazzy)](https://control.ros.org/jazzy/doc/ros2_control/doc/index.html)
+- [`gz_ros2_control` package documentation (jazzy)](https://github.com/ros-controls/gz_ros2_control/blob/jazzy/doc/index.rst)
+- [General Gazebo Tutorials Collection](https://github.com/lexmaister/gazebo_tutorial)
