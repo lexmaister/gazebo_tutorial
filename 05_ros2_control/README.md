@@ -189,3 +189,7 @@ source /opt/ros/jazzy/setup.bash
 source install/setup.bash
 ros2 run panda_gz_ros2_ctrl demo_control
 ```
+
+example node running:
+
+![demo_ctrl](./docs/demo_ctrl.png)
