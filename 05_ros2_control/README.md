@@ -220,7 +220,7 @@ ros2 action send_goal /panda_arm_controller/follow_joint_trajectory control_msgs
 To see the "ground truth" data from the simulation, you can "echo" the /joint_states topic. This is invaluable for seeing if a joint is truly stuck or just moving very little.
 
 ```sh
-ros2 topic echo /joint_states sensor_msgs/msg/JointState
+ros2 topic echo /joint_states
 ```
 
 Example message contains all joints' data:
