@@ -10,7 +10,7 @@ This set of tutorials is intended for **Gazebo Harmonic and newer versions**, ma
 - [Export From Blender With Phobos - Basic Elements](https://github.com/lexmaister/gazebo_tutorial/tree/main/02_blender_phobos_export-frames)
 - [Estimation of Joint Torque with Force Torque Sensor](https://github.com/lexmaister/gazebo_tutorial/tree/main/03_moving_arm-monitoring_torque/)
 - [Connect ROS2 and Gazebo Simulation with ros_gz_bridge](https://github.com/lexmaister/gazebo_tutorial/tree/main/04_ros2_communication/)
-- [Controlling a Panda Arm in Gazebo Sim with Position Control (pos2_control)](https://github.com/lexmaister/gazebo_tutorial/tree/main/05_ros2_control/)
+- [Controlling a Panda Arm in Gazebo Sim with Position Control (ros2_control)](https://github.com/lexmaister/gazebo_tutorial/tree/main/05_ros2_control/)
 
 ## References
 

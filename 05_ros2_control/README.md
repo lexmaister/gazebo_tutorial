@@ -311,7 +311,7 @@ The robot will automatically execute a sequence of motions:
 
 ## Video
 
-<!-- [![video_tutorial_YT](https://img.youtube.com/vi/fmhGUUFOLGU/0.jpg)](https://www.youtube.com/watch?v=fmhGUUFOLGU) -->
+[![video_tutorial_YT](https://img.youtube.com/vi/LciIEdbv88U/0.jpg)](https://www.youtube.com/watch?v=LciIEdbv88U)
 
 ## References
 
