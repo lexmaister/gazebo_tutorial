@@ -35,6 +35,19 @@ transforms:
 ...
 ```
 
+* Add MoveIt elements to package got with MoveIt Assistant:
+  * inside `config`:
+    * `moveit.rviz`
+    * `moveit_controllers.yaml`
+    * `kinematics.yaml`
+    * `pilz_cartesian_limits.yaml`
+    * `joint_limits.yaml` with enabled acceleration limits
+      * set `has_acceleration_limits` to `true`
+      * set acceleration limits: for arm joints to 5.0, for fingers to 0.01
+      * set fingers velosity limit 0.01
+  * to `srdf`:
+    * `panda.srdf`
+
 
 
 * URDF: `moveit_ws/src/moveit_resources/panda_description/urdf/panda.urdf.xacro`

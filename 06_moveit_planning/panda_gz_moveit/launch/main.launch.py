@@ -15,59 +15,53 @@ from launch.substitutions import (
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
 from launch_ros.parameter_descriptions import ParameterValue
+from moveit_configs_utils import MoveItConfigsBuilder
+
+
+PKG = "panda_gz_moveit"
 
 
 def generate_launch_description():
+    # ----- LAUNCH ARGUMENTS -----
 
-    # ----- PARAMETERS -----
-
-    # Launch Arguments
     logger_level_arg = DeclareLaunchArgument(
         "logger_level",
         default_value="info",
         description="Logging level (debug, info, warn, error, fatal)",
     )
+
+    #  ----- PARAMETERS -----
+
     logger_level = LaunchConfiguration("logger_level")
 
-    use_sim_time_arg = DeclareLaunchArgument(
-        "use_sim_time",
-        default_value="true",
-        description="If true, use simulated clock",
+    moveit_config = (
+        MoveItConfigsBuilder("panda", package_name=PKG)
+        .robot_description(
+            file_path="urdf/panda.urdf.xacro",
+            # IMPORTANT: Use sim time to sync ros2 <-> gazebo
+            mappings={"use_sim_time": "true"},
+        )
+        .robot_description_semantic(file_path="srdf/panda.srdf")
+        .robot_description_kinematics(file_path="config/kinematics.yaml")
+        .trajectory_execution(file_path="config/moveit_controllers.yaml")
+        .planning_scene_monitor(
+            publish_robot_description=True,
+            publish_robot_description_semantic=False,  # due to custom semantic was specified
+        )
+        .joint_limits(file_path="config/joint_limits.yaml")
+        .planning_pipelines(
+            pipelines=["ompl", "stomp", "pilz_industrial_motion_planner"]
+        )
+        .to_moveit_configs()
     )
-    use_sim_time = LaunchConfiguration("use_sim_time", default="true")
 
-    # Robot description from URDF
-    robot_description_content = Command(
-        [
-            PathJoinSubstitution([FindExecutable(name="xacro")]),
-            " ",
-            PathJoinSubstitution(
-                [
-                    FindPackageShare("panda_gz_moveit"),
-                    "urdf",
-                    "panda.urdf.xacro",
-                ]
-            ),
-        ]
-    )
-    robot_description = {
-        "robot_description": ParameterValue(robot_description_content, value_type=str)
-    }
-
-    # Controller config path
     ros2_controllers = PathJoinSubstitution(
-        [FindPackageShare("panda_gz_moveit"), "config", "ros2_controllers.yaml"]
+        [FindPackageShare(PKG), "config", "ros2_controllers.yaml"]
     )
 
-    # World SDF path
-    world = PathJoinSubstitution(
-        [FindPackageShare("panda_gz_moveit"), "sdf", "main.sdf"]
-    )
+    world = PathJoinSubstitution([FindPackageShare(PKG), "sdf", "main.sdf"])
 
-    # RViz config path
-    rviz_config = PathJoinSubstitution(
-        [FindPackageShare("panda_gz_moveit"), "config", "view_robot.rviz"]
-    )
+    rviz_config = PathJoinSubstitution([FindPackageShare(PKG), "config", "moveit.rviz"])
 
     # ----- NODES -----
 
@@ -75,9 +69,35 @@ def generate_launch_description():
     node_robot_state_publisher = Node(
         package="robot_state_publisher",
         executable="robot_state_publisher",
-        parameters=[robot_description, {"use_sim_time": use_sim_time}],
+        parameters=[moveit_config.robot_description, {"use_sim_time": True}],
         output="screen",
         arguments=["--ros-args", "--log-level", logger_level],
+    )
+
+    # move_group node (THE CORE OF MOVEIT)
+    run_move_group_node = Node(
+        package="moveit_ros_move_group",
+        executable="move_group",
+        output="screen",
+        parameters=[moveit_config.to_dict(), {"use_sim_time": True}],
+        arguments=["--ros-args", "--log-level", logger_level],
+    )
+
+    # RViz (with MoveIt plugins)
+    rviz_node = Node(
+        package="rviz2",
+        executable="rviz2",
+        name="rviz2",
+        output="screen",
+        arguments=["-d", rviz_config, "--ros-args", "--log-level", logger_level],
+        parameters=[
+            moveit_config.robot_description,
+            moveit_config.robot_description_semantic,
+            moveit_config.robot_description_kinematics,
+            moveit_config.planning_pipelines,
+            moveit_config.joint_limits,
+            {"use_sim_time": True},
+        ],
     )
 
     # Gasebo Sim
@@ -119,7 +139,8 @@ def generate_launch_description():
         ],
     )
 
-    # Controllers
+    # ----- CONTROLLERS -----
+
     joint_state_broadcaster_spawner = Node(
         package="controller_manager",
         executable="spawner",
@@ -172,21 +193,10 @@ def generate_launch_description():
         output="screen",
     )
 
-    # RViz
-    rviz_node = Node(
-        package="rviz2",
-        executable="rviz2",
-        name="rviz2",
-        output="screen",
-        arguments=["-d", rviz_config, "--ros-args", "--log-level", logger_level],
-        # RViz needs to use simulation time
-        parameters=[{"use_sim_time": use_sim_time}],
-    )
-
     return LaunchDescription(
         [
             logger_level_arg,
-            use_sim_time_arg,
+            run_move_group_node,
             gz_sim,
             bridge,
             node_robot_state_publisher,

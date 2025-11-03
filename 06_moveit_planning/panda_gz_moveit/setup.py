@@ -19,8 +19,10 @@ setup(
         (os.path.join("share", package_name, "sdf"), glob("sdf/*")),
         # Robot descripion
         (os.path.join("share", package_name, "urdf"), glob("urdf/*")),
-        # moveit and ros2_control config files
+        # Moveit and ros2_control config files
         (os.path.join("share", package_name, "config"), glob("config/*")),
+        # Panda semantic description
+        (os.path.join("share", package_name, "srdf"), glob("srdf/*")),
     ],
     install_requires=["setuptools"],
     zip_safe=True,
