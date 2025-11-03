@@ -47,40 +47,8 @@ transforms:
       * set fingers velosity limit 0.01
   * to `srdf`:
     * `panda.srdf`
-
-
-
-* URDF: `moveit_ws/src/moveit_resources/panda_description/urdf/panda.urdf.xacro`
-* update `config/joint_limits.yaml`:
-  * set `has_acceleration_limits` to `true`
-  * set acceleration limits: for arm joints to 5.0, for fingers to 0.01
-  * set fingers velosity limit 0.01
-* unset `MotionPlanning` -> `Planned Path` -> `Loop Animation`
-* create `gazebo.launch.py`
-* update `config/panda.ros2_control.xacro`:
-  
-```xml
-...
-<ros2_control name="${name}" type="system">
-    <hardware>
-        <plugin>gz_ros2_control/GazeboSimSystem</plugin>
-    </hardware>
-    ...
-```
-
-* update `config/panda.urdf.xacro`:
-  
-```xml
-<xacro:panda_ros2_control name="PandaGazebo" ... />
-```
-
-* uncomment and correct in package.xml
-
-```xml
-<exec_depend>joint_trajectory_controller</exec_depend>
-<exec_depend>gz_ros2_control</exec_depend>
-```
-
+* in Rviz: unset `MotionPlanning` -> `Planned Path` -> `Loop Animation`
+* create `main.launch.py`
 
 ## Video
 
