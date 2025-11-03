@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="panda">
+    <!-- To fix spawned model in Gazebo -->
+    <link name="world"/>
+
+    <joint name="fixed" type="fixed">
+        <parent link="world"/>
+        <child link="panda_link0"/>
+        <origin xyz="-0.1 -0.1 0" rpy="0 0 0"/>
+    </joint>
+
+    <!-- Import panda urdf file -->
+    <xacro:include filename="$(find moveit_resources_panda_description)/urdf/panda.urdf.xacro" />
+
+    <!-- Import panda ros2_control -->
+    <xacro:include filename="$(find panda_gz_moveit)/urdf/panda_ros2_ctlr.urdf.xacro"/>
+
+    <!-- Import gz_ros2_control -->
+    <xacro:include filename="$(find panda_gz_moveit)/urdf/gz_ros2_control.urdf.xacro"/>
+
+</robot>
