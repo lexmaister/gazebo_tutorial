@@ -31,7 +31,5 @@ setup(
     description="This example package demonstrates how to privide motion planning for a Panda manipulator with MoveIt and Gazebo Sim.",
     license="MIT",
     tests_require=["pytest"],
-    entry_points={
-        "console_scripts": ["demo_control = panda_gz_moveit.demo_control:main"],
-    },
+    entry_points={},
 )

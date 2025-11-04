@@ -7,14 +7,11 @@ from launch.actions import (
 from launch.event_handlers import OnProcessExit
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import (
-    Command,
-    FindExecutable,
     LaunchConfiguration,
     PathJoinSubstitution,
 )
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
-from launch_ros.parameter_descriptions import ParameterValue
 from moveit_configs_utils import MoveItConfigsBuilder
 
 
@@ -59,7 +56,9 @@ def generate_launch_description():
         [FindPackageShare(PKG), "config", "ros2_controllers.yaml"]
     )
 
-    world = PathJoinSubstitution([FindPackageShare(PKG), "sdf", "main.sdf"])
+    world = PathJoinSubstitution([FindPackageShare(PKG), "sdf", "sim_world.sdf"])
+
+    wall = PathJoinSubstitution([FindPackageShare(PKG), "sdf", "wall.sdf"])
 
     rviz_config = PathJoinSubstitution([FindPackageShare(PKG), "config", "moveit.rviz"])
 
@@ -122,7 +121,7 @@ def generate_launch_description():
         ],
     )
 
-    gz_spawn_entity = Node(
+    gz_spawn_panda = Node(
         package="ros_gz_sim",
         executable="create",
         output="screen",
@@ -200,11 +199,11 @@ def generate_launch_description():
             gz_sim,
             bridge,
             node_robot_state_publisher,
-            gz_spawn_entity,
+            gz_spawn_panda,
             rviz_node,
             RegisterEventHandler(
                 event_handler=OnProcessExit(
-                    target_action=gz_spawn_entity,
+                    target_action=gz_spawn_panda,
                     on_exit=[joint_state_broadcaster_spawner],
                 )
             ),

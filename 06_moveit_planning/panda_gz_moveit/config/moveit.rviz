@@ -5,6 +5,10 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /MotionPlanning1
+        - /MotionPlanning1/Scene Geometry1
+        - /MotionPlanning1/Scene Robot1
+        - /MotionPlanning1/Planning Request1
+        - /MotionPlanning1/Planning Metrics1
         - /MotionPlanning1/Planned Path1
       Splitter Ratio: 0.5
     Tree Height: 196
@@ -47,7 +51,7 @@ Visualization Manager:
       MoveIt_Planning_Attempts: 10
       MoveIt_Planning_Time: 5
       MoveIt_Use_Cartesian_Path: false
-      MoveIt_Use_Constraint_Aware_IK: false
+      MoveIt_Use_Constraint_Aware_IK: true
       MoveIt_Workspace:
         Center:
           X: 0
@@ -277,10 +281,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.38999971747398376
+      Pitch: 0.44999969005584717
       Target Frame: panda_link0
       Value: Orbit (rviz_default_plugins)
-      Yaw: 0.5220116972923279
+      Yaw: 1.197011113166809
     Saved: ~
 Window Geometry:
   Displays:
@@ -298,5 +302,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1272
-  X: 0
+  X: 646
   Y: 27
