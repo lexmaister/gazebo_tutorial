@@ -58,8 +58,6 @@ def generate_launch_description():
 
     world = PathJoinSubstitution([FindPackageShare(PKG), "sdf", "sim_world.sdf"])
 
-    wall = PathJoinSubstitution([FindPackageShare(PKG), "sdf", "wall.sdf"])
-
     rviz_config = PathJoinSubstitution([FindPackageShare(PKG), "config", "moveit.rviz"])
 
     # ----- NODES -----
