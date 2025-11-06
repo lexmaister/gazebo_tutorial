@@ -110,3 +110,8 @@ In the RViz window, under the `MotionPlanning` panel:
 * [`ros2_control` package documentation (jazzy)](https://control.ros.org/jazzy/doc/ros2_control/doc/index.html)
 * [`gz_ros2_control` package documentation (jazzy)](https://github.com/ros-controls/gz_ros2_control/blob/jazzy/doc/index.rst)
 * [General Gazebo Tutorials Collection](https://github.com/lexmaister/gazebo_tutorial)
+
+## Similar projects
+
+* [panda_gz_moveit2](https://github.com/AndrejOrsula/panda_gz_moveit2/tree/jazzy)
+* [how to control a robotic arm using ros 2 control and gazebo](https://automaticaddison.com/how-to-control-a-robotic-arm-using-ros-2-control-and-gazebo/)
