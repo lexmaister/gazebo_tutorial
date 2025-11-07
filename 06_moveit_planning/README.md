@@ -101,7 +101,7 @@ In the RViz window, under the `MotionPlanning` panel:
 
 ## Video
 
-<!-- [![video_tutorial_YT](https://img.youtube.com/vi/LciIEdbv88U/0.jpg)](https://www.youtube.com/watch?v=LciIEdbv88U) -->
+[![video_tutorial_YT](https://img.youtube.com/vi/Vdl_bdIvewE/0.jpg)](https://www.youtube.com/watch?v=Vdl_bdIvewE)
 
 ## References
 
