@@ -7,6 +7,15 @@
   <maintainer email="lexmaister@gmail.com">lexmaister</maintainer>
   <license>MIT</license>
 
+  <depend>rclpy</depend>
+  <depend>moveit_configs_utils</depend>
+  <depend>moveit_ros_move_group</depend>
+  <depend>robot_state_publisher</depend>
+  <depend>rviz2</depend>
+  <depend>ros_gz_sim</depend>
+  <depend>ros_gz_bridge</depend>
+  <depend>controller_manager</depend>
+
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
   <test_depend>ament_pep257</test_depend>
