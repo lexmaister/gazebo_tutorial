@@ -14,12 +14,6 @@ In this guide, you will learn how to:
 
 ## Prerequisites
 
-The MoveIt 2 packages are installed for your ROS 2 distribution (e.g., Jazzy):
-
-```bash
-sudo apt update && sudo apt install ros-jazzy-moveit
-```
-
 It's recommended to complete the previous tutorial: [Controlling a Panda Arm in Gazebo with ros2_control](ttps://github.com/lexmaister/gazebo_tutorial/tree/main/05_ros2_control/) and also [MoveIt Setup Assistant Example](https://moveit.picknik.ai/main/doc/examples/setup_assistant/setup_assistant_tutorial.html).
 
 ## Integrating MoveIt with the Panda Robot
