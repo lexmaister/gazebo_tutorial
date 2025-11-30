@@ -80,6 +80,61 @@ Other Files:
 * `config/pilz_cartesian_limits.yaml`: Defines limits for Cartesian path planning.
 * `config/moveit.rviz`: An RViz configuration file pre-loaded with the MotionPlanning plugin for interactive planning.
 
+## Setup and Installation
+
+This project is structured as a ROS 2 package and should be built from source in a **colcon** workspace. The following steps will guide you through the setup process.
+
+### Create a Colcon Workspace
+
+If you don't have one already, create a new tutorial workspace and navigate to it:
+
+```sh
+mkdir -p ~/tutorial_ws/src
+cd ~/tutorial_ws/src
+```
+
+### Clone the Repository
+
+Download package code into it:
+
+* Go to: [GitHub Download Directory](https://download-directory.github.io/)
+* Paste pkg address `https://github.com/lexmaister/gazebo_tutorial/tree/main/06_moveit_planning/panda_gz_moveit` and click `Download`
+* Unpack zip to `tutorial_ws/src` (example): into the `src` directory of your workspace:
+
+### Install Dependencies with `rosdep`
+
+`rosdep` is a command-line tool that will automatically find and install all the system dependencies your project needs, including MoveIt, Gazebo, and other required ROS 2 packages. This is the recommended way to prepare your environment.
+
+```sh
+# Navigate to the workspace root
+cd ~/tutorial_ws
+
+# Initialize rosdep (only needs to be done once per new ROS installation)
+sudo rosdep init
+rosdep update
+
+# Run rosdep to install all declared dependencies from the packages in 'src'
+rosdep install --from-paths src -y --ignore-src
+```
+
+This command reads the `package.xml` files in your source directory, identifies all dependencies, and installs them using your system's package manager (e.g., `apt`).
+
+### Build and Source the Workspace
+
+Once all dependencies are installed, build the packages using `colcon`:
+
+```sh
+# From the workspace root (e.g., ~/tutorial_ws)
+colcon build
+
+# After the build is complete, source the new setup file
+source ~/tutorial_ws/install/setup.bash
+```
+
+Sourcing the `setup.bash` file makes your terminal aware of the packages you just built, so you can launch them.
+
+With these steps completed, you are now ready to launch the simulation.
+
 ## Launching and Interacting with the Simulation
 
 ### Main Launch and Scene Objects
