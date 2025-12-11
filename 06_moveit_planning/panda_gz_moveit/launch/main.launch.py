@@ -19,14 +19,6 @@ PKG = "panda_gz_moveit"
 
 
 def generate_launch_description():
-    # ----- LAUNCH ARGUMENTS -----
-
-    logger_level_arg = DeclareLaunchArgument(
-        "logger_level",
-        default_value="info",
-        description="Logging level (debug, info, warn, error, fatal)",
-    )
-
     #  ----- PARAMETERS -----
 
     logger_level = LaunchConfiguration("logger_level")
@@ -61,6 +53,16 @@ def generate_launch_description():
 
     rviz_config = PathJoinSubstitution([FindPackageShare(PKG), "config", "moveit.rviz"])
 
+    # ----- LAUNCH ARGUMENTS -----
+
+    logger_level_arg = DeclareLaunchArgument(
+        "logger_level",
+        default_value="info",
+        description="Logging level (debug, info, warn, error, fatal)",
+    )
+
+    rviz_config_arg = DeclareLaunchArgument("rviz_config", default_value=rviz_config)
+
     # ----- NODES -----
 
     # Robots description publisher
@@ -91,9 +93,15 @@ def generate_launch_description():
     rviz_node = Node(
         package="rviz2",
         executable="rviz2",
-        name="rviz2",
+        name="panda_rviz",
         output="screen",
-        arguments=["-d", rviz_config, "--ros-args", "--log-level", logger_level],
+        arguments=[
+            "-d",
+            LaunchConfiguration("rviz_config"),
+            "--ros-args",
+            "--log-level",
+            logger_level,
+        ],
         parameters=[
             moveit_config.robot_description,
             moveit_config.robot_description_semantic,
