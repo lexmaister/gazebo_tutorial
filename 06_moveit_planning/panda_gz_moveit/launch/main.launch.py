@@ -58,10 +58,14 @@ def generate_launch_description():
     logger_level_arg = DeclareLaunchArgument(
         "logger_level",
         default_value="info",
-        description="Logging level (debug, info, warn, error, fatal)",
+        description="Logging level (debug, info, warn, error, critical)",
     )
 
-    rviz_config_arg = DeclareLaunchArgument("rviz_config", default_value=rviz_config)
+    rviz_config_arg = DeclareLaunchArgument(
+        "rviz_config",
+        default_value=rviz_config,
+        description="Path to RViz2 config file",
+    )
 
     # ----- NODES -----
 
@@ -208,6 +212,7 @@ def generate_launch_description():
     return LaunchDescription(
         [
             logger_level_arg,
+            rviz_config_arg,
             run_move_group_node,
             gz_sim,
             bridge,
