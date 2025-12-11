@@ -36,6 +36,7 @@ def generate_launch_description():
         .robot_description(
             file_path="urdf/panda.urdf.xacro",
             # IMPORTANT: Use sim time to sync ros2 <-> gazebo
+            # tell the robot hardware simulation plugin (inside Gazebo) to use simulation time
             mappings={"use_sim_time": "true"},
         )
         .robot_description_semantic(file_path="srdf/panda.srdf")
@@ -76,7 +77,13 @@ def generate_launch_description():
         package="moveit_ros_move_group",
         executable="move_group",
         output="screen",
-        parameters=[moveit_config.to_dict(), {"use_sim_time": True}],
+        parameters=[
+            moveit_config.to_dict(),
+            # load ExecuteTaskSolutionCapability so we can execute found MTC solutions in simulation
+            {"capabilities": "move_group/ExecuteTaskSolutionCapability"},
+            # tell the MoveIt motion planning node (inside ROS 2) to use simulation time
+            {"use_sim_time": True},
+        ],
         arguments=["--ros-args", "--log-level", logger_level],
     )
 
