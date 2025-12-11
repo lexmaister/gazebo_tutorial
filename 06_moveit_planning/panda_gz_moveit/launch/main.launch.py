@@ -196,6 +196,24 @@ def generate_launch_description():
         ],
     )
 
+    spawn_chain = (
+        gz_spawn_panda,
+        joint_state_broadcaster_spawner,
+        panda_arm_controller_spawner,
+        panda_hand_controller_spawner,
+    )
+
+    spawners = []
+    for i in range(len(spawn_chain) - 1):
+        spawners.append(
+            RegisterEventHandler(
+                event_handler=OnProcessExit(
+                    target_action=spawn_chain[i],
+                    on_exit=spawn_chain[i + 1],
+                )
+            )
+        )
+
     # Clock bridge: Gazebo <-> ROS 2
     bridge = Node(
         package="ros_gz_bridge",
@@ -219,20 +237,6 @@ def generate_launch_description():
             node_robot_state_publisher,
             gz_spawn_panda,
             rviz_node,
-            RegisterEventHandler(
-                event_handler=OnProcessExit(
-                    target_action=gz_spawn_panda,
-                    on_exit=[joint_state_broadcaster_spawner],
-                )
-            ),
-            RegisterEventHandler(
-                event_handler=OnProcessExit(
-                    target_action=joint_state_broadcaster_spawner,
-                    on_exit=[
-                        panda_arm_controller_spawner,
-                        panda_hand_controller_spawner,
-                    ],
-                )
-            ),
         ]
+        + spawners
     )
