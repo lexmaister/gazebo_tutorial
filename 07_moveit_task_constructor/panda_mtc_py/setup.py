@@ -29,6 +29,7 @@ setup(
     entry_points={
         "console_scripts": [
             f"mtc_node = {package_name}.mtc_node:main",
+            f"wait_env_ready = {package_name}.wait_env_ready:main",
         ],
     },
 )

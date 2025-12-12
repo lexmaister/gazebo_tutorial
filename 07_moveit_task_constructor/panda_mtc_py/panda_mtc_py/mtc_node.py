@@ -28,7 +28,7 @@ def main():
         # logger.info(f"  doc:  {p.doc()}")
 
     logger.info("-------")
-    logger.info(f"{currentState.properties.keys()}")
+    logger.info(f"{type(currentState.properties)}")
     logger.info("-------")
 
     # Add the stage to the task hierarchy
