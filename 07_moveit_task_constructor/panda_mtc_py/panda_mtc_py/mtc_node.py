@@ -1,10 +1,12 @@
 #! /usr/bin/env python3
-# -*- coding: utf-8 -*-
 
-from moveit.task_constructor import core, stages
-import rclcpp
 import time
+import rclcpp
+from moveit.task_constructor import core, stages
+from geometry_msgs.msg import TwistStamped, Twist, Vector3Stamped, Vector3
+from std_msgs.msg import Header
 from rclpy.logging import get_logger
+
 
 rclcpp.init()
 node = rclcpp.Node("mtc_node")
@@ -13,40 +15,43 @@ logger = get_logger("mtc_node")
 
 
 def main():
+    # Specify the planning group
+    group = "panda_arm"
+
     # Create a task
     task = core.Task()
-    task.name = "current state"
+    task.name = "pick and place"
     task.loadRobotModel(node)
 
     # Get the current robot state
     currentState = stages.CurrentState("current state")
-    logger.info(f"Current stage properties:")
-    for k, p in currentState.properties.items():
-        logger.info(f"Property key={k}")
-        logger.info(f"  name: {p.description()}")
-        # logger.info(f"  type: {p.type()}")  # usually a string describing C++ type
-        # logger.info(f"  doc:  {p.doc()}")
-
-    logger.info("-------")
-    logger.info(f"{type(currentState.properties)}")
-    logger.info("-------")
-
     # Add the stage to the task hierarchy
     task.add(currentState)
 
-    # if task.plan():
-    #     task.publish(task.solutions[0])
+    # Create a planner instance that is used to connect
+    # the current state to the grasp approach pose
+    pipelinePlanner = core.PipelinePlanner(node, "ompl", "RRTConnectkConfigDefault")
+    planners = [(group, pipelinePlanner)]
 
-    # if task.plan():
-    #     sol = task.solutions[0]
-    #     for sub in sol.sub_trajectory():
-    #         stage = sub.creator()  # this is a valid Stage view from C++
-    #         logger.info(f"Stage in solution: {stage.name()}")
+    # move along x
+    cartesian = core.CartesianPath()
+    move = stages.MoveRelative("x +0.2", cartesian)
+    move.group = group
+    header = Header(frame_id="world")
+    move.setDirection(
+        Vector3Stamped(header=header, vector=Vector3(x=0.2, y=0.0, z=0.0))
+    )
+    task.add(move)
 
-    #     # for k, v in currentState.properties.items():
-    #     #     logger.info(f"solution start {k}: {v.value}")
+    if task.plan():
+        task.publish(task.solutions[0])
+        logger.info("PLANNING RESULTS ARE PUBLISHED")
+        # Keep node alive to inspect in RViz
+        time.sleep(3600)
+    else:
+        logger.error("CAN'T PLAN TASK!")
 
-    #     # task.introspection
-    # else:
-    #     print("!!! something went wrong !!!")
-    time.sleep(1)
+    # avoid ClassLoader warning
+    del planners
+
+    logger.info(f"MTC node is finished")
