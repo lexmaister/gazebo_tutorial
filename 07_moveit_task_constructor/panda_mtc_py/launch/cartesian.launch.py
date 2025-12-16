@@ -48,8 +48,26 @@ def generate_launch_description():
         output="screen",
     )
 
+    # --- Loading scene ---
+
+    scene_yaml_path = PathJoinSubstitution(
+        [
+            FindPackageShare(PKG),
+            "config",
+            "scene.yaml",
+        ]
+    )
+
+    add_scene = Node(
+        package=PKG,
+        executable="add_scene_from_yaml",
+        name="add_scene_from_yaml",
+        output="screen",
+        parameters=[{"scene_path": scene_yaml_path}],
+    )
+
     # --- Main MTC node ---
-    pick_place_task = Node(
+    cartesian_task = Node(
         package=PKG,
         executable="mtc_node",
         output="screen",
@@ -63,8 +81,14 @@ def generate_launch_description():
             RegisterEventHandler(
                 OnProcessExit(
                     target_action=env_waiter,
-                    on_exit=[pick_place_task],
+                    on_exit=[add_scene],
                 )
             ),
+            # RegisterEventHandler(
+            #     OnProcessExit(
+            #         target_action=add_scene,
+            #         on_exit=[cartesian_task],
+            #     )
+            # ),
         ]
     )

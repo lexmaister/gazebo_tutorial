@@ -20,7 +20,7 @@ def main():
 
     # Create a task
     task = core.Task()
-    task.name = "pick and place"
+    task.name = "cartesian"
     task.loadRobotModel(node)
 
     # Get the current robot state

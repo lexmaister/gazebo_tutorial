@@ -1,0 +1,23 @@
+# Fixed frame
+header:
+  frame_id: "world"
+
+id: "composite_obstacle"
+primitives:
+  - type: "BOX"
+    dimensions: [0.2, 0.2, 0.2]
+  - type: "SPHERE"
+    dimensions: [0.1]
+  - type: "CYLINDER"
+    dimensions: [0.3, 0.05]
+
+primitive_poses:
+  # Pose for BOX
+  - position: {x: 0.5, y: 0.0, z: 0.1}
+    orientation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}
+  # Pose for SPHERE
+  - position: {x: 0.4, y: 0.2, z: 0.1}
+    orientation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}
+  # Pose for CYLINDER
+  - position: {x: 0.6, y: -0.2, z: 0.15}
+    orientation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}
