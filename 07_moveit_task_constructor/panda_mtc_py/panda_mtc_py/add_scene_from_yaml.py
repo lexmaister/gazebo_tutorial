@@ -8,7 +8,7 @@ from rclpy.logging import get_logger
 from rclpy.node import Node
 
 from geometry_msgs.msg import Pose
-from moveit_msgs.msg import CollisionObject
+from moveit_msgs.msg import CollisionObject, PlanningScene
 from shape_msgs.msg import SolidPrimitive
 from std_msgs.msg import Header
 
@@ -91,41 +91,49 @@ class AddSceneFromYaml(Node):
             raise RuntimeError(f"YAML file not found: {self.scene_path}")
 
         self.publisher = self.create_publisher(
-            CollisionObject,
-            "/collision_object",
-            10,
+            msg_type=CollisionObject,
+            topic="/collision_object",
+            qos_profile=10,
         )
 
-        self._published = False
-        self.timer = self.create_timer(1.0, self._on_timer)
+        self.subscriber = self.create_subscription(
+            msg_type=PlanningScene,
+            topic="/monitored_planning_scene",
+            callback=self._on_planning_scene,
+            qos_profile=10,
+        )
+
+        self.timer = self.create_timer(2.0, self._on_timer)
 
         logger.info(f"Will load scene from: {self.scene_path}")
 
     def _on_timer(self) -> None:
         """Load YAML and publish a CollisionObject once."""
-        if self._published:
-            return
-
         try:
             with open(self.scene_path, "r") as f:
                 data = yaml.safe_load(f)
         except Exception as exc:
-            logger.error(f"Failed to read YAML file: {exc}")
-            return
+            raise RuntimeError(f"Failed to read YAML file: {exc}")
 
         try:
             msg = dict_to_collision_object(data)
             msg.header.stamp = self.get_clock().now().to_msg()
         except Exception as exc:
-            logger.error(f"Failed to convert YAML to CollisionObject: {exc}")
-            return
+            raise RuntimeError(f"Failed to convert YAML to CollisionObject: {exc}")
 
         logger.info(
             f'Publishing collision object: id="{msg.id}", '
             f'frame="{msg.header.frame_id}" on /collision_object'
         )
         self.publisher.publish(msg)
-        self._published = True
+
+    def _on_planning_scene(self, msg: PlanningScene):
+        """Callback for handling messages in /monitored_planning_scene topic"""
+        logger.info(f"Got msg in 'monitored_planning_scene' topic: {msg.name}")
+        co: list[CollisionObject] = list(msg.world.collision_objects)
+        if co:
+            logger.info(f"Collision object is added: {co[0].id!r}")
+            rclpy.shutdown()
 
 
 def main(args=None) -> None:
@@ -134,8 +142,7 @@ def main(args=None) -> None:
     node = None
     try:
         node = AddSceneFromYaml()
-        # Give timer enough time to fire once
-        rclpy.spin_once(node, timeout_sec=3)
+        rclpy.spin(node)
     except Exception as e:
         logger.error(str(e))
     finally:
