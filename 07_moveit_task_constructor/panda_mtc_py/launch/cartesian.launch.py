@@ -58,12 +58,28 @@ def generate_launch_description():
         ]
     )
 
+    target_yaml_path = PathJoinSubstitution(
+        [
+            FindPackageShare(PKG),
+            "config",
+            "target.yaml",
+        ]
+    )
+
     add_scene = Node(
         package=PKG,
         executable="add_scene_from_yaml",
-        name="add_scene_from_yaml",
+        name="add_scene",
         output="screen",
         parameters=[{"scene_path": scene_yaml_path}],
+    )
+
+    add_target = Node(
+        package=PKG,
+        executable="add_scene_from_yaml",
+        name="add_target",
+        output="screen",
+        parameters=[{"scene_path": target_yaml_path}],
     )
 
     # --- Main MTC node ---
@@ -81,7 +97,7 @@ def generate_launch_description():
             RegisterEventHandler(
                 OnProcessExit(
                     target_action=env_waiter,
-                    on_exit=[add_scene],
+                    on_exit=[add_scene, add_target],
                 )
             ),
             # RegisterEventHandler(

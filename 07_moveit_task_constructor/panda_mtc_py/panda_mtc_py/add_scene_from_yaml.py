@@ -105,10 +105,18 @@ class AddSceneFromYaml(Node):
 
         self.timer = self.create_timer(2.0, self._on_timer)
 
+        # publish once
+        self._published = False
+        # to check if object was added to scene
+        self.object_id = ""
+
         logger.info(f"Will load scene from: {self.scene_path}")
 
     def _on_timer(self) -> None:
         """Load YAML and publish a CollisionObject once."""
+        if self._published:
+            return
+
         try:
             with open(self.scene_path, "r") as f:
                 data = yaml.safe_load(f)
@@ -117,6 +125,7 @@ class AddSceneFromYaml(Node):
 
         try:
             msg = dict_to_collision_object(data)
+            self.object_id = msg.id
             msg.header.stamp = self.get_clock().now().to_msg()
         except Exception as exc:
             raise RuntimeError(f"Failed to convert YAML to CollisionObject: {exc}")
@@ -126,14 +135,16 @@ class AddSceneFromYaml(Node):
             f'frame="{msg.header.frame_id}" on /collision_object'
         )
         self.publisher.publish(msg)
+        self._published = True
 
     def _on_planning_scene(self, msg: PlanningScene):
         """Callback for handling messages in /monitored_planning_scene topic"""
         logger.info(f"Got msg in 'monitored_planning_scene' topic: {msg.name}")
-        co: list[CollisionObject] = list(msg.world.collision_objects)
-        if co:
-            logger.info(f"Collision object is added: {co[0].id!r}")
-            rclpy.shutdown()
+        c_objects: list[CollisionObject] = list(msg.world.collision_objects)
+        for co in c_objects:
+            if co.id == self.object_id:
+                logger.info(f"Collision object {co.id!r} is added")
+                rclpy.shutdown()
 
 
 def main(args=None) -> None:

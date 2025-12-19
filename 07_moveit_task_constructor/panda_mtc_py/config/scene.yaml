@@ -5,19 +5,19 @@ header:
 id: "composite_obstacle"
 primitives:
   - type: "BOX"
-    dimensions: [0.2, 0.2, 0.2]
-  - type: "SPHERE"
-    dimensions: [0.1]
-  - type: "CYLINDER"
-    dimensions: [0.3, 0.05]
+    dimensions: [0.2, 0.2, 0.4]
+  - type: "BOX"
+    dimensions: [0.2, 0.2, 0.4]
+  - type: "BOX"
+    dimensions: [0.2, 0.05, 1.0]
 
 primitive_poses:
-  # Pose for BOX
-  - position: {x: 0.5, y: 0.0, z: 0.1}
+  # Pose for BOX 1
+  - position: {x: 0.45, y: 0.3, z: 0.2}
     orientation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}
-  # Pose for SPHERE
-  - position: {x: 0.4, y: 0.2, z: 0.1}
+  # Pose for BOX 2
+  - position: {x: 0.45, y: -0.5, z: 0.2}
     orientation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}
-  # Pose for CYLINDER
-  - position: {x: 0.6, y: -0.2, z: 0.15}
+  # Pose for BOX 3 - WALL
+  - position: {x: 0.45, y: -0.1, z: 0.5}
     orientation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}

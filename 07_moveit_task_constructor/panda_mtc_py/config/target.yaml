@@ -1,0 +1,12 @@
+# Fixed frame
+header:
+  frame_id: "world"
+
+id: "target"
+primitives:
+  - type: "CYLINDER"
+    dimensions: [0.1, 0.01]
+
+primitive_poses:
+  - position: {x: 0.45, y: 0.3, z: 0.45}
+    orientation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}
