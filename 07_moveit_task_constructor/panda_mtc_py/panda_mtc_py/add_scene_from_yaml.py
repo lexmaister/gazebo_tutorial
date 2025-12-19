@@ -90,12 +90,6 @@ class AddSceneFromYaml(Node):
         if not os.path.exists(self.scene_path):
             raise RuntimeError(f"YAML file not found: {self.scene_path}")
 
-        self.publisher = self.create_publisher(
-            msg_type=CollisionObject,
-            topic="/collision_object",
-            qos_profile=10,
-        )
-
         self.subscriber = self.create_subscription(
             msg_type=PlanningScene,
             topic="/monitored_planning_scene",
@@ -103,7 +97,13 @@ class AddSceneFromYaml(Node):
             qos_profile=10,
         )
 
-        self.timer = self.create_timer(2.0, self._on_timer)
+        self.publisher = self.create_publisher(
+            msg_type=CollisionObject,
+            topic="/collision_object",
+            qos_profile=10,
+        )
+
+        self.timer = self.create_timer(2.0, self._on_timer, autostart=False)
 
         # publish once
         self._published = False
@@ -111,6 +111,8 @@ class AddSceneFromYaml(Node):
         self.object_id = ""
 
         logger.info(f"Will load scene from: {self.scene_path}")
+        # to init subscriber
+        self.timer.reset()
 
     def _on_timer(self) -> None:
         """Load YAML and publish a CollisionObject once."""

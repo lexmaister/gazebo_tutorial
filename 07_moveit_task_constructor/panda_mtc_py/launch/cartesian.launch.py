@@ -97,12 +97,18 @@ def generate_launch_description():
             RegisterEventHandler(
                 OnProcessExit(
                     target_action=env_waiter,
-                    on_exit=[add_scene, add_target],
+                    on_exit=[add_scene],
+                )
+            ),
+            RegisterEventHandler(
+                OnProcessExit(
+                    target_action=add_scene,
+                    on_exit=[add_target],
                 )
             ),
             # RegisterEventHandler(
             #     OnProcessExit(
-            #         target_action=add_scene,
+            #         target_action=add_target,
             #         on_exit=[cartesian_task],
             #     )
             # ),
