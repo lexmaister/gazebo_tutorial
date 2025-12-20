@@ -106,11 +106,11 @@ def generate_launch_description():
                     on_exit=[add_target],
                 )
             ),
-            # RegisterEventHandler(
-            #     OnProcessExit(
-            #         target_action=add_target,
-            #         on_exit=[cartesian_task],
-            #     )
-            # ),
+            RegisterEventHandler(
+                OnProcessExit(
+                    target_action=add_target,
+                    on_exit=[cartesian_task],
+                )
+            ),
         ]
     )
