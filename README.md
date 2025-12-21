@@ -12,6 +12,7 @@ This set of tutorials is intended for **Gazebo Harmonic and newer versions**, ma
 - [Connect ROS2 and Gazebo Simulation with ros_gz_bridge](https://github.com/lexmaister/gazebo_tutorial/tree/main/04_ros2_communication/)
 - [Controlling a Panda Arm in Gazebo Sim with Position Control (ros2_control)](https://github.com/lexmaister/gazebo_tutorial/tree/main/05_ros2_control/)
 - [Planning Panda Arm's motion in MoveIt](https://github.com/lexmaister/gazebo_tutorial/tree/main/06_moveit_planning)
+- [Planning Panda Arm's tasks in Moveit Task Constructor on Python](https://github.com/lexmaister/gazebo_tutorial/tree/main/07_moveit_task_constructor)
 
 ## References
 
