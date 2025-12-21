@@ -100,9 +100,9 @@ def main():
     task.name = "cartesian"
     task.loadRobotModel(node)
 
-    # # Planner for arm motions
-    # pipeline_planner = core.PipelinePlanner(node, "ompl", "RRTConnectkConfigDefault")
-    # planners = [(arm, pipeline_planner)]
+    # Planner for arm motions
+    pipeline_planner = core.PipelinePlanner(node, "ompl", "RRTConnectkConfigDefault")
+    planners = [(arm, pipeline_planner)]
 
     cartesian = core.CartesianPath()
     joint_interp = core.JointInterpolationPlanner()
@@ -168,9 +168,9 @@ def main():
     else:
         logger.error("CAN'T PLAN TASK!")
 
-    # # avoid ClassLoader warning
-    # del pipeline_planner
-    # del planners
+    # avoid ClassLoader warning
+    del pipeline_planner
+    del planners
     logger.info("MTC node is finished")
 
 
