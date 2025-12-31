@@ -190,7 +190,7 @@ typically includes:
 
 ## Video
 
-<!-- [![video_tutorial_YT](https://img.youtube.com/vi/Vdl_bdIvewE/0.jpg)](https://www.youtube.com/watch?v=Vdl_bdIvewE) -->
+[![video_tutorial_YT](https://img.youtube.com/vi/yleyBoTt2XI/0.jpg)](https://youtu.be/yleyBoTt2XI)
 
 ## References
 
