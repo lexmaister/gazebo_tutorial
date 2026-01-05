@@ -9,13 +9,8 @@ from rclpy.logging import get_logger
 from moveit.task_constructor import core, stages
 
 from geometry_msgs.msg import (
-    Vector3Stamped,
-    Vector3,
-    PointStamped,
-    Point,
+    TwistStamped,
     PoseStamped,
-    Pose,
-    Quaternion,
 )
 from std_msgs.msg import Header
 
@@ -25,71 +20,23 @@ node = rclcpp.Node("mtc_node")
 logger = get_logger("mtc_node")
 
 
-def quaternion_from_euler(roll, pitch, yaw):
-    """
-    Convert an Euler angle to a quaternion.
-
-    Input
-        :param roll: The roll (rotation around x-axis) angle in radians.
-        :param pitch: The pitch (rotation around y-axis) angle in radians.
-        :param yaw: The yaw (rotation around z-axis) angle in radians.
-
-    Output
-        :return qx, qy, qz, qw: The orientation in quaternion [x,y,z,w] format
-    """
-    r = roll
-    p = pitch
-    y = yaw
-    sin = math.sin
-    cos = math.cos
-    qx = sin(r / 2) * cos(p / 2) * cos(y / 2) - cos(r / 2) * sin(p / 2) * sin(y / 2)
-    qy = cos(r / 2) * sin(p / 2) * cos(y / 2) + sin(r / 2) * cos(p / 2) * sin(y / 2)
-    qz = cos(r / 2) * cos(p / 2) * sin(y / 2) - sin(r / 2) * sin(p / 2) * cos(y / 2)
-    qw = cos(r / 2) * cos(p / 2) * cos(y / 2) + sin(r / 2) * sin(p / 2) * sin(y / 2)
-
-    return [qx, qy, qz, qw]
-
-
-def quaternion_multiply(q0, q1):
-    """
-    Multiplies two quaternions.
-
-    Input
-        :param q0: A 4 element array containing the first quaternion (q01, q11, q21, q31)
-        :param q1: A 4 element array containing the second quaternion (q02, q12, q22, q32)
-
-    Output
-        :return: A 4 element array containing the final quaternion (q03,q13,q23,q33)
-
-    """
-    # Extract the values from q0
-    x0 = q0[0]
-    y0 = q0[1]
-    z0 = q0[2]
-    w0 = q0[3]
-
-    # Extract the values from q1
-    x1 = q1[0]
-    y1 = q1[1]
-    z1 = q1[2]
-    w1 = q1[3]
-
-    # Compute the product of the two quaternions, term by term
-    q0q1_w = w0 * w1 - x0 * x1 - y0 * y1 - z0 * z1
-    q0q1_x = w0 * x1 + x0 * w1 + y0 * z1 - z0 * y1
-    q0q1_y = w0 * y1 - x0 * z1 + y0 * w1 + z0 * x1
-    q0q1_z = w0 * z1 + x0 * y1 - y0 * x1 + z0 * w1
-
-    # Create a 4 element array containing the final quaternion
-    final_quaternion = [q0q1_w, q0q1_x, q0q1_y, q0q1_z]
-
-    # Return a 4 element array containing the final quaternion (q02,q12,q22,q32)
-    return final_quaternion
-
-
 def main():
     """
-    Simple MTC cartesian using both 'arm' and 'hand' planning group.
+    Simple MTC pick and place task using both 'arm' and 'hand' planning group:
+    Task "pick_place"
+    ├── Stage "current_state"
+    ├── Stage "connect" (Connect)
+    ├── Container "pick"
+    │    ├── Generate grasp pose(s)
+    │    ├── Move to pre-grasp
+    │    ├── Close gripper / attach
+    │    ├── Lift object
+    └── Container "place"
+        ├── Move to place pre-pose
+        ├── Lower
+        ├── Open gripper / detach
+        └── Retreat
+    based on tutorial: https://moveit.github.io/moveit_task_constructor/tutorials/pick-and-place.html
     """
 
     arm = "panda_arm"
@@ -97,64 +44,85 @@ def main():
 
     # Create a task
     task = core.Task()
-    task.name = "cartesian"
+    task.name = "pick_place"
     task.loadRobotModel(node)
 
-    # Planner for arm motions
-    pipeline_planner = core.PipelinePlanner(node, "ompl", "RRTConnectkConfigDefault")
-    planners = [(arm, pipeline_planner)]
+    object_name = "target"
 
-    cartesian = core.CartesianPath()
-    joint_interp = core.JointInterpolationPlanner()
-    world_header = Header(frame_id="world")
+    # frames
+    world = "world"
+    panda_hand = "panda_hand"
 
     # ------------------------------------------------------------------
     # 1) Current state
     # ------------------------------------------------------------------
-    current_state = stages.CurrentState("current state")
+    current_state = stages.CurrentState("Current state")
     task.add(current_state)
 
     # ------------------------------------------------------------------
-    # 2) Approach: move and rotate closer to the 'target' position
+    # 2) Open hand - to fit with pregrasp condition
     # ------------------------------------------------------------------
-    q1 = quaternion_from_euler(0, math.pi / 2, 0)
-    q2 = quaternion_from_euler(0, 0, math.pi * 3 / 4)
-    qx, qy, qz, qw = quaternion_multiply(q1, q2)
-
-    approach = stages.MoveTo("approach target", cartesian)
-    approach.group = arm
-    approach.setGoal(
-        PoseStamped(
-            header=world_header,
-            pose=Pose(
-                position=Point(x=0.15, y=0.3, z=0.45),
-                orientation=Quaternion(x=qx, y=qy, z=qz, w=qw),
-            ),
-        )
-    )
-    task.add(approach)
-
-    # ------------------------------------------------------------------
-    # 3) Open hand
-    # ------------------------------------------------------------------
-
-    open_hand = stages.MoveTo("open hand", joint_interp)
+    open_hand = stages.MoveTo("open hand", core.JointInterpolationPlanner())
     open_hand.group = hand
     open_hand.setGoal("open")
     task.add(open_hand)
 
     # ------------------------------------------------------------------
-    # 4) Final small move to the grasp position
+    # 3) Connect the current robot state with the solutions of the following stages
     # ------------------------------------------------------------------
-    grasp_move = stages.MoveRelative("move to target", cartesian)
-    grasp_move.group = arm
-    grasp_move.setDirection(
-        Vector3Stamped(
-            header=world_header,
-            vector=Vector3(x=0.195, y=0.0, z=0.0),
-        )
-    )
-    task.add(grasp_move)
+    # Create a planner instance that is used to connect
+    # the current state to the grasp approach pose
+    pipeline_planner = core.PipelinePlanner(node, "ompl", "RRTConnectkConfigDefault")
+    planners = [(arm, pipeline_planner)]
+
+    # Connect the current and pick stages
+    task.add(stages.Connect("Connect", planners))
+
+    # ------------------------------------------------------------------
+    # 4) Pick: grasp 'target' object
+    # https://github.com/moveit/moveit_task_constructor/blob/jazzy/core/include/moveit/task_constructor/stages/pick.h
+    # ------------------------------------------------------------------
+    # The grasp generator spawns a set of possible grasp poses around the object
+    grasp_generator = stages.GenerateGraspPose("Generate Grasp Pose")
+    grasp_generator.angle_delta = math.pi / 2
+    grasp_generator.pregrasp = "open"
+    grasp_generator.grasp = "close"
+    # Generate solutions for all initial states
+    grasp_generator.setMonitoredStage(task["Current state"])
+
+    # SimpleGrasp container encapsulates IK calculation of arm pose as well as finger closing
+    simpleGrasp = stages.SimpleGrasp(grasp_generator, "Grasp")
+
+    # from the cartesian example - finish panda_hand frame pose
+    ik_frame = PoseStamped()
+    ik_frame.header.frame_id = panda_hand
+    ik_frame.pose.position.z = 0.1034  # tcp between fingers
+    # Set frame for IK calculation in the center between the fingers
+    ik_frame.pose.orientation.x = 0.0
+    ik_frame.pose.orientation.y = 0.7071
+    ik_frame.pose.orientation.z = 0.0
+    ik_frame.pose.orientation.w = 0.7071
+    simpleGrasp.setIKFrame(ik_frame)
+
+    # Pick container comprises approaching, grasping (using SimpleGrasp stage), and lifting of object
+    pick = stages.Pick(simpleGrasp, "Pick")
+    pick.eef = hand
+    pick.object = object_name
+
+    # Twist to approach the object
+    approach = TwistStamped()
+    approach.header.frame_id = world
+    approach.twist.linear.x = 0.3
+    pick.setApproachMotion(motion=approach, min_distance=0.03, max_distance=0.1)
+
+    # Twist to lift the object
+    lift = TwistStamped()
+    lift.header.frame_id = world
+    lift.twist.linear.z = 1.0
+    pick.setLiftMotion(motion=lift, min_distance=0.03, max_distance=0.1)
+
+    # Add the pick stage to the task's stage hierarchy
+    task.add(pick)
 
     # ------------------------------------------------------------------
     # Plan and execute

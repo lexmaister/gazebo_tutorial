@@ -94,15 +94,15 @@ def generate_launch_description():
         [
             env_launch,
             env_waiter,
+            # RegisterEventHandler(
+            #     OnProcessExit(
+            #         target_action=env_waiter,
+            #         on_exit=[add_scene],
+            #     )
+            # ),
             RegisterEventHandler(
                 OnProcessExit(
                     target_action=env_waiter,
-                    on_exit=[add_scene],
-                )
-            ),
-            RegisterEventHandler(
-                OnProcessExit(
-                    target_action=add_scene,
                     on_exit=[add_target],
                 )
             ),
