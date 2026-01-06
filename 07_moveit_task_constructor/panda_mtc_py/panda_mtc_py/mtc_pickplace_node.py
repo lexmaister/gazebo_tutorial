@@ -7,11 +7,9 @@ import rclcpp
 from rclpy.logging import get_logger
 
 from moveit.task_constructor import core, stages
+from moveit_msgs.msg import Constraints, OrientationConstraint
 
-from geometry_msgs.msg import (
-    TwistStamped,
-    PoseStamped,
-)
+from geometry_msgs.msg import TwistStamped, PoseStamped, Pose, Quaternion, Point
 from std_msgs.msg import Header
 
 
@@ -23,20 +21,7 @@ logger = get_logger("mtc_node")
 def main():
     """
     Simple MTC pick and place task using both 'arm' and 'hand' planning group:
-    Task "pick_place"
-    ├── Stage "current_state"
-    ├── Stage "connect" (Connect)
-    ├── Container "pick"
-    │    ├── Generate grasp pose(s)
-    │    ├── Move to pre-grasp
-    │    ├── Close gripper / attach
-    │    ├── Lift object
-    └── Container "place"
-        ├── Move to place pre-pose
-        ├── Lower
-        ├── Open gripper / detach
-        └── Retreat
-    based on tutorial: https://moveit.github.io/moveit_task_constructor/tutorials/pick-and-place.html
+    based on tutorial: https://github.com/moveit/moveit_task_constructor/blob/jazzy/demo/scripts/pickplace.py
     """
 
     arm = "panda_arm"
@@ -50,8 +35,10 @@ def main():
     object_name = "target"
 
     # frames
-    world = "world"
-    panda_hand = "panda_hand"
+    world_header = Header(frame_id="world")
+    panda_hand_header = Header(frame_id="panda_hand")
+
+    joint_interp = core.JointInterpolationPlanner()
 
     # ------------------------------------------------------------------
     # 1) Current state
@@ -62,13 +49,13 @@ def main():
     # ------------------------------------------------------------------
     # 2) Open hand - to fit with pregrasp condition
     # ------------------------------------------------------------------
-    open_hand = stages.MoveTo("open hand", core.JointInterpolationPlanner())
+    open_hand = stages.MoveTo("open hand", joint_interp)
     open_hand.group = hand
     open_hand.setGoal("open")
     task.add(open_hand)
 
     # ------------------------------------------------------------------
-    # 3) Connect the current robot state with the solutions of the following stages
+    # 3) Connect the current robot state with the solutions of the following Pick stage
     # ------------------------------------------------------------------
     # Create a planner instance that is used to connect
     # the current state to the grasp approach pose
@@ -76,7 +63,7 @@ def main():
     planners = [(arm, pipeline_planner)]
 
     # Connect the current and pick stages
-    task.add(stages.Connect("Connect", planners))
+    task.add(stages.Connect("Connect current - pick", planners))
 
     # ------------------------------------------------------------------
     # 4) Pick: grasp 'target' object
@@ -93,15 +80,16 @@ def main():
     # SimpleGrasp container encapsulates IK calculation of arm pose as well as finger closing
     simpleGrasp = stages.SimpleGrasp(grasp_generator, "Grasp")
 
-    # from the cartesian example - finish panda_hand frame pose
-    ik_frame = PoseStamped()
-    ik_frame.header.frame_id = panda_hand
-    ik_frame.pose.position.z = 0.1034  # tcp between fingers
-    # Set frame for IK calculation in the center between the fingers
-    ik_frame.pose.orientation.x = 0.0
-    ik_frame.pose.orientation.y = 0.7071
-    ik_frame.pose.orientation.z = 0.0
-    ik_frame.pose.orientation.w = 0.7071
+    # Goal pose for the panda_hand frame
+    ik_frame = PoseStamped(
+        header=panda_hand_header,
+        pose=Pose(
+            position=Point(x=0.0, y=0.0, z=0.1034),  # in the center between the fingers
+            orientation=Quaternion(
+                x=0.0, y=0.7071, z=0.0, w=0.7071
+            ),  # from the cartesian example - finish panda_hand frame pose
+        ),
+    )
     simpleGrasp.setIKFrame(ik_frame)
 
     # Pick container comprises approaching, grasping (using SimpleGrasp stage), and lifting of object
@@ -109,20 +97,63 @@ def main():
     pick.eef = hand
     pick.object = object_name
 
-    # Twist to approach the object
-    approach = TwistStamped()
-    approach.header.frame_id = world
+    # Twist to approach the object - from side
+    approach = TwistStamped(header=world_header)
     approach.twist.linear.x = 0.3
     pick.setApproachMotion(motion=approach, min_distance=0.03, max_distance=0.1)
 
     # Twist to lift the object
-    lift = TwistStamped()
-    lift.header.frame_id = world
+    lift = TwistStamped(header=world_header)
     lift.twist.linear.z = 1.0
     pick.setLiftMotion(motion=lift, min_distance=0.03, max_distance=0.1)
 
     # Add the pick stage to the task's stage hierarchy
     task.add(pick)
+
+    # ------------------------------------------------------------------
+    # 5) Connect the Pick stage with the following Place stage
+    # https://github.com/moveit/moveit_task_constructor/blob/jazzy/core/include/moveit/task_constructor/stages/connect.h
+    # ------------------------------------------------------------------
+    con = stages.Connect("Connect pick - place", planners)
+    con.timeout = 5.0
+    task.add(con)
+
+    # ------------------------------------------------------------------
+    # 6) Plase the 'target' object
+    # ------------------------------------------------------------------
+    # Pose that the object should have after placing
+    # ! use this format of pose definition
+    finish_pose = PoseStamped()
+    finish_pose.header = world_header
+    finish_pose.pose.position.x = 0.45
+    finish_pose.pose.position.y = -0.5
+    finish_pose.pose.position.z = 0.45
+    finish_pose.pose.orientation.w = 1.0
+
+    place_generator = stages.GeneratePlacePose("Generate Place Pose")
+    place_generator.setMonitoredStage(task["Pick"])
+    place_generator.object = object_name
+    place_generator.pose = finish_pose
+
+    simpleUnGrasp = stages.SimpleUnGrasp(place_generator, "UnGrasp")
+
+    place = stages.Place(simpleUnGrasp, "Place")
+    place.eef = hand
+    place.object = object_name
+    place.eef_frame = "panda_link8"
+
+    # Twist to retract from the object
+    retract = TwistStamped(header=world_header)
+    retract.twist.linear.z = 1.0
+    place.setRetractMotion(retract, 0.03, 0.1)
+
+    # Twist to place the object
+    placeMotion = TwistStamped(header=panda_hand_header)
+    placeMotion.twist.linear.z = 1.0
+    place.setPlaceMotion(placeMotion, 0.03, 0.1)
+
+    # Add the place pipeline to the task's hierarchy
+    task.add(place)
 
     # ------------------------------------------------------------------
     # Plan and execute
