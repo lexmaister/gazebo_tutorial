@@ -130,7 +130,7 @@ def main():
 
     con = stages.Connect("Connect pick - place", planners)
     con.path_constraints = constraints
-    con.timeout = 5.0  # increase due to constraints calc
+    con.timeout = 10.0  # increase due to constraints calc
     task.add(con)
 
     # ------------------------------------------------------------------
@@ -164,7 +164,7 @@ def main():
 
     # Twist to place the object
     placeMotion = TwistStamped(header=panda_hand_header)
-    placeMotion.twist.linear.z = 1.0
+    placeMotion.twist.linear.x = -0.5
     place.setPlaceMotion(placeMotion, 0.03, 0.1)
 
     # Add the place pipeline to the task's hierarchy
