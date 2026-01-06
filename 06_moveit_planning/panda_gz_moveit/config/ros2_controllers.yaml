@@ -23,6 +23,8 @@ panda_arm_controller:
     state_interfaces:
       - position
       - velocity
+    # Allow MoveIt trajectories whose final velocities are not exactly zero
+    allow_nonzero_velocity_at_trajectory_end: true
 
 
 # Controls the 2-finger gripper
