@@ -15,17 +15,18 @@ joint_limits:
     min_position: -0.0001
     max_position: 0.0401
     has_velocity_limits: true
-    max_velocity: 10.0
+    # fit with URDF
+    max_velocity: 0.2
     has_acceleration_limits: true
-    max_acceleration: 2.0
+    max_acceleration: 0.5
   panda_finger_joint2:
     has_position_limits: true
     min_position: -0.0001
     max_position: 0.0401
     has_velocity_limits: true
-    max_velocity: 10.0
+    max_velocity: 0.2
     has_acceleration_limits: true
-    max_acceleration: 2.0
+    max_acceleration: 0.5
   
   # arm joints
   panda_joint1:
