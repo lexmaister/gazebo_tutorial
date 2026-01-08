@@ -14,6 +14,8 @@ setup(
         # Include all launch files from the 'launch' and 'config' directories
         (os.path.join("share", package_name, "launch"), glob("launch/*.launch.py")),
         (os.path.join("share", package_name, "config"), glob("config/*")),
+        # SDF files
+        (os.path.join("share", package_name, "sdf"), glob("sdf/*")),
     ],
     install_requires=["setuptools"],
     zip_safe=True,

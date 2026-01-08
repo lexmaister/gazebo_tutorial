@@ -1,0 +1,90 @@
+<sdf version='1.11'>
+  <model name='composite_obstacle'>
+    <link name='table_1_link'>
+      <inertial>
+        <pose>0 -0.40000000000000002 0.27500000000000002 0 0 0</pose>
+        <mass>40</mass>
+        <inertia>
+          <ixx>10.31251</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>7.1750100000000003</iyy>
+          <iyz>0</iyz>
+          <izz>3.404170000000001</izz>
+        </inertia>
+      </inertial>
+      <collision name='table_1_link_fixed_joint_lump__table_1_collision_collision'>
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.20000000000000001 0.20000000000000001 0.40000000000000002</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name='table_1_link_fixed_joint_lump__table_2_collision_collision_1'>
+        <pose>0 -0.80000000000000004 0 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.20000000000000001 0.20000000000000001 0.40000000000000002</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name='table_1_link_fixed_joint_lump__wall_collision_collision_2'>
+        <pose>0 -0.40000000000000002 0.55000000000000004 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.20000000000000001 0.050000000000000003 1.5</size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name='table_1_link_fixed_joint_lump__table_1_visual'>
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.20000000000000001 0.20000000000000001 0.40000000000000002</size>
+          </box>
+        </geometry>
+        <material>
+          <diffuse>0.122549996 1 0.122549996 0.9</diffuse>
+          <ambient>0.122549996 1 0.122549996 0.9</ambient>
+        </material>
+      </visual>
+      <visual name='table_1_link_fixed_joint_lump__table_2_visual_1'>
+        <pose>0 -0.80000000000000004 0 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.20000000000000001 0.20000000000000001 0.40000000000000002</size>
+          </box>
+        </geometry>
+        <material>
+          <diffuse>0.122549996 1 0.122549996 0.9</diffuse>
+          <ambient>0.122549996 1 0.122549996 0.9</ambient>
+        </material>
+      </visual>
+      <visual name='table_1_link_fixed_joint_lump__wall_visual_2'>
+        <pose>0 -0.40000000000000002 0.55000000000000004 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.20000000000000001 0.050000000000000003 1.5</size>
+          </box>
+        </geometry>
+        <material>
+          <diffuse>0.122549996 1 0.122549996 0.9</diffuse>
+          <ambient>0.122549996 1 0.122549996 0.9</ambient>
+        </material>
+      </visual>
+    </link>
+    <frame name='t2_joint' attached_to='table_1_link'>
+      <pose>0 -0.80000000000000004 0 0 0 0</pose>
+    </frame>
+    <frame name='table_2_link' attached_to='t2_joint'>
+      <pose>0 0 0 0 0 0</pose>
+    </frame>
+    <frame name='wall_joint' attached_to='table_1_link'>
+      <pose>0 -0.40000000000000002 0.55000000000000004 0 0 0</pose>
+    </frame>
+    <frame name='wall_link' attached_to='wall_joint'>
+      <pose>0 0 0 0 0 0</pose>
+    </frame>
+  </model>
+</sdf>
