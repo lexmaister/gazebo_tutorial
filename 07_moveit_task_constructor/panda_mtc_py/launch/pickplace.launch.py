@@ -48,7 +48,7 @@ def generate_launch_description():
         output="screen",
     )
 
-    # --- Loading scene ---
+    # --- Loading scene - MTC ---
 
     scene_yaml_path = PathJoinSubstitution(
         [
@@ -82,6 +82,46 @@ def generate_launch_description():
         parameters=[{"scene_path": target_yaml_path}],
     )
 
+    # --- Loading scene - Gazebo ---
+    scene = PathJoinSubstitution([FindPackageShare(PKG), "sdf", "scene.sdf"])
+    target = PathJoinSubstitution([FindPackageShare(PKG), "sdf", "target.sdf"])
+
+    gz_spawn_scene = Node(
+        package="ros_gz_sim",
+        executable="create",
+        output="screen",
+        arguments=[
+            "-file",
+            scene,
+            "-name",
+            "composite_obstacle",
+            "-x",
+            "0.45",
+            "-y",
+            "0.3",
+            "-z",
+            "0.2",
+        ],
+    )
+
+    gz_spawn_target = Node(
+        package="ros_gz_sim",
+        executable="create",
+        output="screen",
+        arguments=[
+            "-file",
+            target,
+            "-name",
+            "target",
+            "-x",
+            "0.45",
+            "-y",
+            "0.3",
+            "-z",
+            "0.36",
+        ],
+    )
+
     # --- Main MTC node ---
     pick_place_task = Node(
         package=PKG,
@@ -97,13 +137,13 @@ def generate_launch_description():
             RegisterEventHandler(
                 OnProcessExit(
                     target_action=env_waiter,
-                    on_exit=[add_scene],
+                    on_exit=[add_scene, gz_spawn_scene],
                 )
             ),
             RegisterEventHandler(
                 OnProcessExit(
                     target_action=add_scene,
-                    on_exit=[add_target],
+                    on_exit=[add_target, gz_spawn_target],
                 )
             ),
             RegisterEventHandler(

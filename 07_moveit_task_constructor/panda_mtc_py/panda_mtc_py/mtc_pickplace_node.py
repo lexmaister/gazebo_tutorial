@@ -44,7 +44,7 @@ def main():
 
     # Slow gripper planner
     slow_gripper = core.JointInterpolationPlanner()
-    slow_gripper.max_velocity_scaling_factor = 0.02
+    slow_gripper.max_velocity_scaling_factor = 0.015
 
     # ------------------------------------------------------------------
     # 1) Current state

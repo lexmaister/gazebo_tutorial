@@ -5,7 +5,7 @@ header:
 id: "target"
 primitives:
   - type: "CYLINDER"
-    dimensions: [0.1, 0.01]
+    dimensions: [0.1, 0.015]
 
 primitive_poses:
   - position: {x: 0.45, y: 0.3, z: 0.45}
