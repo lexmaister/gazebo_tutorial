@@ -38,7 +38,13 @@ def main():
     world_header = Header(frame_id="world")
     panda_hand_header = Header(frame_id="panda_hand")
 
-    joint_interp = core.JointInterpolationPlanner()
+    # Planner instance that is used in Connect stages for arm
+    pipeline_planner = core.PipelinePlanner(node, "ompl", "RRTConnectkConfigDefault")
+    planners = [(arm, pipeline_planner)]
+
+    # Slow gripper planner
+    slow_gripper = core.JointInterpolationPlanner()
+    slow_gripper.max_velocity_scaling_factor = 0.02
 
     # ------------------------------------------------------------------
     # 1) Current state
@@ -49,7 +55,7 @@ def main():
     # ------------------------------------------------------------------
     # 2) Open hand - to fit with pregrasp condition
     # ------------------------------------------------------------------
-    open_hand = stages.MoveTo("open hand", joint_interp)
+    open_hand = stages.MoveTo("open hand", slow_gripper)
     open_hand.group = hand
     open_hand.setGoal("open")
     task.add(open_hand)
@@ -57,17 +63,12 @@ def main():
     # ------------------------------------------------------------------
     # 3) Connect the current robot state with the solutions of the following Pick stage
     # ------------------------------------------------------------------
-    # Create a planner instance that is used to connect
-    # the current state to the grasp approach pose
-    pipeline_planner = core.PipelinePlanner(node, "ompl", "RRTConnectkConfigDefault")
-    planners = [(arm, pipeline_planner)]
-
-    # Connect the current and pick stages
     task.add(stages.Connect("Connect current - pick", planners))
 
     # ------------------------------------------------------------------
     # 4) Pick: grasp 'target' object
     # https://github.com/moveit/moveit_task_constructor/blob/jazzy/core/include/moveit/task_constructor/stages/pick.h
+    # https://github.com/moveit/moveit_task_constructor/blob/jazzy/core/src/stages/simple_grasp.cpp
     # ------------------------------------------------------------------
     # The grasp generator spawns a set of possible grasp poses around the object
     grasp_generator = stages.GenerateGraspPose("Generate Grasp Pose")
@@ -78,7 +79,7 @@ def main():
     grasp_generator.setMonitoredStage(task["Current state"])
 
     # SimpleGrasp container encapsulates IK calculation of arm pose as well as finger closing
-    simpleGrasp = stages.SimpleGrasp(grasp_generator, "Grasp")
+    simpleGrasp = stages.SimpleGrasp(grasp_generator, slow_gripper, "Grasp")
 
     # Goal pose for the panda_hand frame
     ik_frame = PoseStamped(
@@ -150,7 +151,7 @@ def main():
     place_generator.object = object_name
     place_generator.pose = finish_pose
 
-    simpleUnGrasp = stages.SimpleUnGrasp(place_generator, "UnGrasp")
+    simpleUnGrasp = stages.SimpleUnGrasp(place_generator, slow_gripper, "UnGrasp")
 
     place = stages.Place(simpleUnGrasp, "Place")
     place.eef = hand
