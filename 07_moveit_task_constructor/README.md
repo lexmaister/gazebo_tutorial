@@ -11,11 +11,9 @@ In this example you will:
 - Launch a ready‑to‑use Gazebo + MoveIt environment for the Panda arm.
 - Load a composite obstacle and a thin cylindrical target into the MoveIt
   PlanningScene from YAML files.
-- Run a Python MTC node that:
-  - Starts from the current state.
-  - Approaches a target pose along a Cartesian path.
-  - Opens the Panda hand.
-  - Executes a small relative motion as a final approach.
+- Run a Python MTC node that provides one of the example tasks:
+  - cartesian movement,
+  - pick and place target object.
 
 ## Prerequisites
 
@@ -28,12 +26,14 @@ contains:
 
 - A **launch file** that orchestrates Gazebo + MoveIt + helper nodes:
   - `launch/cartesian.launch.py`
+  - `launch/pickplace.launch.py`
 - **Helper nodes**:
   - `wait_env_ready.py` – waits until the Panda hand controller is available.
   - `add_scene_from_yaml.py` – loads collision objects from YAML files into
     the MoveIt planning scene.
 - **Main MTC node**:
-  - `mtc_node.py` – defines a simple MTC Cartesian task in Python.
+  - `mtc_node.py` – defines a simple MTC Cartesian task.
+  - `mtc_pickplace_node.py` – defines a simple MTC Pick and Place task.
 - **Configuration files**:
   - `config/scene.yaml` – composite obstacle description.
   - `config/target.yaml` – target object description.
@@ -99,7 +99,7 @@ With these steps completed, you are now ready to launch the simulation.
 
 ## Launch Architecture
 
-### Using `cartesian.launch.py`
+### Catresian movement using `cartesian.launch.py`
 
 This launch file performs several steps:
 
@@ -140,7 +140,7 @@ This launch file performs several steps:
 The logic for starting each step is implemented via `OnProcessExit` handlers:
 each node’s completion triggers the next stage in the sequence.
 
-## Running the Simulation and Task
+### Running the Simulation and Task
 
 After building and sourcing the workspace, you can run the full pipeline.
 
@@ -188,9 +188,157 @@ typically includes:
 - Visualization of trajectory markers and collision objects.
 - Panels for interacting with the PlanningScene and MotionPlanning plugins.
 
-## Video
+### Video #1: catresian path
 
 [![video_tutorial_YT](https://img.youtube.com/vi/yleyBoTt2XI/0.jpg)](https://youtu.be/yleyBoTt2XI)
+
+## Pick and place task using `pickplace.launch.py`
+
+### Update MTC: use a custom JointInterpolationPlanner
+
+In `mtc_pickplace_node.py`, the `SimpleGrasp` and `SimpleUnGrasp` stages are configured to use an externally provided `JointInterpolationPlanner`. This allows us to run the gripper motion with a reduced speed while keeping the rest of the planning pipeline unchanged. To enable this behavior, you must patch the MoveIt Task Constructor core sources to accept an external planner for these stages and then rebuild MTC from source:
+
+- changes inside `include/moveit/task_constructor/stages/simple_grasp.h`:
+
+```c++
+class SimpleGraspBase : public SerialContainer
+{
+protected:
+  // NEW: setup that uses an externally provided planner
+  void setup(std::unique_ptr<Stage>&& generator,
+             bool forward,
+             const std::shared_ptr<solvers::PlannerInterface>& planner);
+}
+
+...
+
+class SimpleGrasp : public SimpleGraspBase
+{
+public:
+  // NEW: constructor that accepts an external planner
+  SimpleGrasp(std::unique_ptr<Stage>&& generator, const std::shared_ptr<solvers::PlannerInterface>& planner,
+              const std::string& name = std::string("grasp"));
+};
+
+class SimpleUnGrasp : public SimpleGraspBase
+{
+public:
+  // NEW: constructor that accepts an external planner
+  SimpleUnGrasp(std::unique_ptr<Stage>&& generator, const std::shared_ptr<solvers::PlannerInterface>& planner,
+                const std::string& name = std::string("ungrasp"));
+};
+```
+
+- changes inside `src/stages/simple_grasp.cpp`:
+
+```c++
+// Use outer planner
+void SimpleGraspBase::setup(std::unique_ptr<Stage>&& generator,
+                            bool forward,
+                            const std::shared_ptr<solvers::PlannerInterface>& planner)
+
+// no need to create an ineer planner
+// auto planner = std::make_shared<solvers::JointInterpolationPlanner>();
+auto move = new MoveTo(forward ? "close gripper" : "open gripper", planner);
+
+...
+
+SimpleGrasp::SimpleGrasp(std::unique_ptr<Stage>&& generator, const std::shared_ptr<solvers::PlannerInterface>& planner,
+                         const std::string& name)
+  : SimpleGraspBase(name) {
+  // new behavior – uses outer planner
+  setup(std::move(generator), true, planner);
+}
+
+SimpleUnGrasp::SimpleUnGrasp(std::unique_ptr<Stage>&& generator,
+                             const std::shared_ptr<solvers::PlannerInterface>& planner, const std::string& name)
+  : SimpleGraspBase(name) {
+  // new behavior – uses outer planner
+  setup(std::move(generator), false, planner);
+}
+```
+
+- changes in python binding `core/python/bindings/src/stages.cppstages.cpp`:
+
+```c++
+
+using PlannerPtr = std::shared_ptr<solvers::PlannerInterface>;
+
+properties::class_<SimpleGrasp, SimpleGraspBase>(m, "SimpleGrasp", R"(
+    Specialization of SimpleGraspBase to realize grasping.
+    ...
+  )")
+  .def(py::init<Stage::pointer&&, const PlannerPtr&, const std::string&>(),
+       "pose_generator"_a,
+       "planner"_a,
+       "name"_a = std::string("grasp"));
+
+properties::class_<SimpleUnGrasp, SimpleGraspBase>(m, "SimpleUnGrasp", R"(
+    Specialization of SimpleGraspBase to realize ungrasping
+    ...
+  )")
+  .property<std::string>("pregrasp", "str: Name of the pre-grasp pose")
+  .property<std::string>("grasp", "str: Name of the grasp pose")
+  .def(py::init<Stage::pointer&&, const PlannerPtr&, const std::string&>(),
+       "pose_generator"_a,
+       "planner"_a,
+       "name"_a = std::string("ungrasp"));
+
+```
+
+- changes in `core/test/pick_ur5.cpp` and `core/test/pick_pr2.cpp`:
+
+```c++
+// add
+#include <moveit/task_constructor/solvers/joint_interpolation.h>
+
+namespace mtc = moveit::task_constructor;
+
+// change
+auto grasp_planner = std::make_shared<mtc::solvers::JointInterpolationPlanner>();
+auto grasp = std::make_unique<mtc::stages::SimpleGrasp>(
+    std::move(grasp_generator), grasp_planner, "grasp");
+```
+
+Build modified MTC core package (`jazzy` example):
+
+```sh
+# inside moveit workspace
+cd moveit_ws/
+. /opt/ros/jazzy/setup.bash
+colcon build --packages-select moveit_task_constructor_core
+. install/setup.bash
+```
+
+After building and sourcing the MoveIt workspace, an external planner might be used for the grasp stages:
+
+```python
+simpleGrasp = stages.SimpleGrasp(grasp_generator, slow_gripper, "Grasp")
+...
+simpleUnGrasp = stages.SimpleUnGrasp(place_generator, slow_gripper, "UnGrasp")
+```
+
+Then you can run the full pipeline:
+
+1. **Source the Gazebo Tutorial Workspace**
+   In a new terminal:
+
+   ```sh
+   cd ~/tutorial_ws
+   source install/setup.bash
+   ```
+
+2. **Launch the Pick and Place Task Tutorial**
+   Launch the main tutorial:
+
+   ```sh
+   ros2 launch panda_mtc_py pickplace.launch.py
+   ```
+
+### Video #2: pick and place task
+
+<!-- [![video_tutorial_YT](https://img.youtube.com/vi/yleyBoTt2XI/0.jpg)](https://youtu.be/yleyBoTt2XI) -->
+
 
 ## References
 
