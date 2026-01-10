@@ -44,7 +44,7 @@ def main():
 
     # Slow gripper planner
     slow_gripper = core.JointInterpolationPlanner()
-    slow_gripper.max_velocity_scaling_factor = 0.015
+    slow_gripper.max_velocity_scaling_factor = 0.05
 
     # ------------------------------------------------------------------
     # 1) Current state
@@ -55,7 +55,7 @@ def main():
     # ------------------------------------------------------------------
     # 2) Open hand - to fit with pregrasp condition
     # ------------------------------------------------------------------
-    open_hand = stages.MoveTo("open hand", slow_gripper)
+    open_hand = stages.MoveTo("Open hand", slow_gripper)
     open_hand.group = hand
     open_hand.setGoal("open")
     task.add(open_hand)

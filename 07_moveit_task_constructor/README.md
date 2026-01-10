@@ -335,10 +335,15 @@ Then you can run the full pipeline:
    ros2 launch panda_mtc_py pickplace.launch.py
    ```
 
+   It is also possible to launch with debug logger level:
+
+   ```sh
+   ros2 launch panda_mtc_py pickplace.launch.py logger_level:=debug
+   ```
+
 ### Video #2: pick and place task
 
 <!-- [![video_tutorial_YT](https://img.youtube.com/vi/yleyBoTt2XI/0.jpg)](https://youtu.be/yleyBoTt2XI) -->
-
 
 ## References
 

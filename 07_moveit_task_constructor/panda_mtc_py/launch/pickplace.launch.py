@@ -1,9 +1,13 @@
 from launch import LaunchDescription
 from launch_ros.actions import Node
-from launch.actions import IncludeLaunchDescription, RegisterEventHandler
+from launch.actions import (
+    IncludeLaunchDescription,
+    RegisterEventHandler,
+    DeclareLaunchArgument,
+)
 from launch.event_handlers import OnProcessExit
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import PathJoinSubstitution
+from launch.substitutions import PathJoinSubstitution, LaunchConfiguration
 from launch_ros.substitutions import FindPackageShare
 
 from panda_gz_moveit.moveit_config import get_panda_moveit_config
@@ -14,6 +18,16 @@ ENV_PKG = "panda_gz_moveit"
 
 
 def generate_launch_description():
+    # --- Logger setup ---
+    logger_level = LaunchConfiguration("logger_level")
+
+    logger_level_arg = DeclareLaunchArgument(
+        "logger_level",
+        default_value="info",
+        description="Logging level (debug, info, warn, error, critical)",
+    )
+
+    # --- Build Moveit config ---
     moveit_config = get_panda_moveit_config(use_sim_time=True).to_dict()
 
     # --- Launch env (Gazebo + controllers + move_group) ---
@@ -37,6 +51,7 @@ def generate_launch_description():
         PythonLaunchDescriptionSource(env_launch_path),
         launch_arguments={
             "rviz_config": rviz_config_path,
+            "logger_level": logger_level,
         }.items(),
     )
 
@@ -46,6 +61,7 @@ def generate_launch_description():
         executable="wait_env_ready",
         name="wait_env_ready",
         output="screen",
+        arguments=["--ros-args", "--log-level", logger_level],
     )
 
     # --- Loading scene - MTC ---
@@ -72,6 +88,7 @@ def generate_launch_description():
         name="add_scene",
         output="screen",
         parameters=[{"scene_path": scene_yaml_path}],
+        arguments=["--ros-args", "--log-level", logger_level],
     )
 
     add_target = Node(
@@ -80,6 +97,7 @@ def generate_launch_description():
         name="add_target",
         output="screen",
         parameters=[{"scene_path": target_yaml_path}],
+        arguments=["--ros-args", "--log-level", logger_level],
     )
 
     # --- Loading scene - Gazebo ---
@@ -101,6 +119,8 @@ def generate_launch_description():
             "0.3",
             "-z",
             "0.2",
+            "log-level",
+            logger_level,
         ],
     )
 
@@ -119,6 +139,8 @@ def generate_launch_description():
             "0.3",
             "-z",
             "0.36",
+            "log-level",
+            logger_level,
         ],
     )
 
@@ -128,10 +150,12 @@ def generate_launch_description():
         executable="mtc_pickplace_node",
         output="screen",
         parameters=[moveit_config, {"use_sim_time": True}],
+        arguments=["--ros-args", "--log-level", logger_level],
     )
 
     return LaunchDescription(
         [
+            logger_level_arg,
             env_launch,
             env_waiter,
             RegisterEventHandler(
