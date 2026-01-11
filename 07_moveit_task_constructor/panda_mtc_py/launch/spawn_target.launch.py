@@ -4,7 +4,7 @@ from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
 
 
-PKG = "panda_gz_moveit"
+PKG = "panda_mtc_py"
 
 
 def generate_launch_description():
