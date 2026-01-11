@@ -38,15 +38,3 @@ panda_hand_controller:
     state_interfaces:
       - position
       - velocity
-    # PID controller settings
-    gains:
-      panda_finger_joint1:
-        # Proportional gain: main stiffness term.
-        # Larger P → faster response, but more overshoot/oscillation.
-        p: 15.0
-        # Integral gain: corrects small steady-state error (e.g. friction).
-        # Keep it small for the gripper to avoid slow oscillations.
-        i: 3.0
-        # Derivative gain: damping term.
-        # Helps reduce overshoot and ringing when P and I are active.
-        d: 0.8
