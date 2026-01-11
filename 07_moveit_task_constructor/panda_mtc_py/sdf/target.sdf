@@ -3,7 +3,7 @@
   <model name="target">
     <link name="link">
       <inertial>
-        <mass>0.1</mass>
+        <mass>0.05</mass>
         <inertia>
           <ixx>0.0001</ixx>
           <iyy>0.0001</iyy>
