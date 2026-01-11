@@ -2,26 +2,6 @@ controller_manager:
   ros__parameters:
     update_rate: 100  # Hz
 
-    # PID gains for controller
-    panda_hand_controller:
-      joints:
-        panda_finger_joint1:
-          # Proportional gain: main stiffness term.
-          # Larger P → faster response, but more overshoot/oscillation.
-          p: 10.0
-          # Integral gain: corrects small steady-state error (e.g. friction).
-          # Keep it small for the gripper to avoid slow oscillations.
-          i: 3.0
-          # Derivative gain: damping term.
-          # Helps reduce overshoot and ringing when P and I are active.
-          d: 0.8
-          # Integral clamp: limit for accumulated integral term.
-          # Prevents I from growing too large when the finger is against hard stops.
-          i_clamp: 0.02
-          # Anti-windup: stop integrating when output is saturated.
-          # Essential when using I on a joint that hits limits regularly.
-          antiwindup: true
-
 joint_state_broadcaster:
   ros__parameters:
     type: joint_state_broadcaster/JointStateBroadcaster
@@ -58,3 +38,15 @@ panda_hand_controller:
     state_interfaces:
       - position
       - velocity
+    # PID controller settings
+    gains:
+      panda_finger_joint1:
+        # Proportional gain: main stiffness term.
+        # Larger P → faster response, but more overshoot/oscillation.
+        p: 15.0
+        # Integral gain: corrects small steady-state error (e.g. friction).
+        # Keep it small for the gripper to avoid slow oscillations.
+        i: 3.0
+        # Derivative gain: damping term.
+        # Helps reduce overshoot and ringing when P and I are active.
+        d: 0.8
