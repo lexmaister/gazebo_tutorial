@@ -161,13 +161,13 @@ def generate_launch_description():
             RegisterEventHandler(
                 OnProcessExit(
                     target_action=env_waiter,
-                    on_exit=[add_scene, gz_spawn_scene],
+                    on_exit=[add_scene, add_target, gz_spawn_scene],
                 )
             ),
             RegisterEventHandler(
                 OnProcessExit(
                     target_action=add_scene,
-                    on_exit=[add_target, gz_spawn_target],
+                    on_exit=[gz_spawn_target],
                 )
             ),
             RegisterEventHandler(

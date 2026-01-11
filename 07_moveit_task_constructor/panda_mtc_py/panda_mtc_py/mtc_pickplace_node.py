@@ -120,8 +120,8 @@ def main():
     oc.header = world_header
     oc.link_name = object_name
     oc.orientation.w = 1.0
-    oc.absolute_x_axis_tolerance = 0.5  # ~29°
-    oc.absolute_y_axis_tolerance = 0.5
+    oc.absolute_x_axis_tolerance = math.pi / 3  # 60°
+    oc.absolute_y_axis_tolerance = math.pi / 3
     oc.absolute_z_axis_tolerance = math.pi
     oc.weight = 1.0
 
@@ -131,7 +131,7 @@ def main():
 
     con = stages.Connect("Connect pick - place", planners)
     con.path_constraints = constraints
-    con.timeout = 5.0  # increase due to constraints calc
+    con.timeout = 7.0  # increase due to constraints calc
     task.add(con)
 
     # ------------------------------------------------------------------
