@@ -131,7 +131,7 @@ def main():
 
     con = stages.Connect("Connect pick - place", planners)
     con.path_constraints = constraints
-    con.timeout = 7.0  # increase due to constraints calc
+    con.timeout = 5.0  # increase due to constraints calc
     task.add(con)
 
     # ------------------------------------------------------------------
