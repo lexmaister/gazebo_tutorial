@@ -343,7 +343,7 @@ Then you can run the full pipeline:
 
 ### Video #2: pick and place task
 
-<!-- [![video_tutorial_YT](https://img.youtube.com/vi/yleyBoTt2XI/0.jpg)](https://youtu.be/yleyBoTt2XI) -->
+[![video_tutorial_YT](https://img.youtube.com/vi/wZAqsriDVeI/0.jpg)](https://youtu.be/wZAqsriDVeI)
 
 ## References
 
