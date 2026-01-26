@@ -10,7 +10,7 @@
     </joint>
 
     <!-- Import panda urdf file -->
-    <xacro:include filename="$(find moveit_resources_panda_description)/urdf/panda.urdf.xacro" />
+    <xacro:include filename="$(find panda_gz_moveit)/urdf/panda_mod.urdf.xacro" />
 
     <!-- Import panda ros2_control -->
     <xacro:include filename="$(find panda_gz_moveit)/urdf/panda_ros2_ctlr.urdf.xacro"/>

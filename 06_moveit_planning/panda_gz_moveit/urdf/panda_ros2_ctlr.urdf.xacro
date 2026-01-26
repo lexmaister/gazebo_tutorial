@@ -113,10 +113,12 @@
             <state_interface name="effort"/>
         </joint>
 
-        <!-- Mimic Finger Joint -->
+        <!-- Second (now actuated) Finger Joint -->
         <joint name="panda_finger_joint2">
-            <!-- NOTE: No command_interface for the mimic joint! -->
-            <!-- It still needs a state interface for the joint_state_broadcaster. -->
+            <command_interface name="position">
+                <param name="min">0.0</param>
+                <param name="max">0.04</param>
+            </command_interface>
             <state_interface name="position">
                 <param name="initial_value">0.0</param>
             </state_interface>
